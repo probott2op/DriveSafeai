@@ -9,6 +9,6 @@ import java.util.List;
 import java.util.Optional;
 
 public interface DriscScoreRepository extends JpaRepository<DriscScore, Long> {
-    List<DriscScore> findByVehicleId(Long vehicleId);
-    Optional<DriscScore> findTopByUseridOrderByCalculatedAtDesc(User user);
+   // List<DriscScore> findByVehicle_Id(Long vehicleId);
+    Optional<DriscScore> findTopByUseridOrderByCalculatedAtDesc(User userid);
 }

@@ -21,12 +21,12 @@ public interface DriveSafeService {
 
     PremiumCalculationDTO calculatePremium(Long userId);
 
-//    String fileClaim(InsuranceClaimDTO dto);
+  String fileClaim(InsuranceClaimDTO dto);
 
-//    List<InsuranceClaimDTO> getClaimsByPolicy(Long policyId);
+    List<InsuranceClaimDTO> getClaimsByPolicy(Long policyId);
 
 
 //upload trip csv file
-//    String uploadTripCsv(MultipartFile file, Long vehicleId);
+    String uploadTripCsv(MultipartFile file, Long vehicleId);
 
 }

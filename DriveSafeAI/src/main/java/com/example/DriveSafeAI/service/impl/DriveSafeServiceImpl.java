@@ -10,6 +10,9 @@ import com.example.DriveSafeAI.service.security.JWTService;
 //import org.apache.commons.csv.CSVFormat;
 //import org.apache.commons.csv.CSVParser;
 //import org.apache.commons.csv.CSVRecord;
+import org.apache.commons.csv.CSVFormat;
+import org.apache.commons.csv.CSVParser;
+import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -21,6 +24,7 @@ import java.io.InputStreamReader;
 import java.io.Reader;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -41,7 +45,7 @@ public class DriveSafeServiceImpl implements DriveSafeService {
     @Autowired private InsuranceClaimRepository claimRepo;
     @Autowired private AuthenticationManager authenticationManager;
     @Autowired private JWTService jwtService;
-//    @Autowired private MLModelClient mlClient;
+   @Autowired private MLModelClient mlClient;
 
     //User Registration
     @Override
@@ -66,9 +70,9 @@ public class DriveSafeServiceImpl implements DriveSafeService {
         return new UserResponseDTO(user.getId(), user.getEmail(), vehicle.getVehicleNo());
     }
 
-//    //User Login
-//    @Override
-//    public UserResponseDTO login(LoginRequestDTO dto) {
+  //User Login
+    //@Override
+  //  public UserResponseDTO login(LoginRequestDTO dto) {
 //        User user = userRepo.findByEmailAndPassword(dto.email, dto.password)
 //                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 //
@@ -111,10 +115,10 @@ public class DriveSafeServiceImpl implements DriveSafeService {
 
         tripRepo.save(trip);
 
-//        Float driveScore = mlClient.getDriveScore(trip);
-        double driveScore = 0;
+        Float driveScore = mlClient.getDriveScore(trip);
+
         DriveScore score = new DriveScore();
-        score.setScore((float) driveScore);
+        score.setScore(driveScore);
         score.setTripData(trip);
         score.setVehicle(vehicle);
         driveScoreRepo.save(score);
@@ -124,7 +128,7 @@ public class DriveSafeServiceImpl implements DriveSafeService {
         n.setMessage("Your Drive Score: " + driveScore);
         notificationRepo.save(n);
 
-        return new TripResponseDTO(trip.getId(), (float) driveScore,
+        return new TripResponseDTO(trip.getId(), driveScore,
                 driveScore > 80 ? "Excellent driving!" : "Improve your braking or acceleration.");
     }
 
@@ -137,16 +141,18 @@ public class DriveSafeServiceImpl implements DriveSafeService {
         Vehicle vehicle = vehicleRepo.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Vehicle not found for user"));
 
-        List<DriveScore> last10 = driveScoreRepo.findTop10ByVehicleIdOrderByCreatedAtDesc(vehicle.getId());
-
+        List<TripData> last10 = driveScoreRepo.findTop10ByVehicleIdOrderByCreatedAtDesc(vehicle.getId())
+                .stream()
+                .map(DriveScore::getTripData)
+                .collect(Collectors.toList());
         if (last10.isEmpty()) {
             throw new RuntimeException("Not enough trip data to calculate DRISC Score.");
         }
 
-//        Float driscScore = mlClient.getRiskScore(last10);
-        double driscScore = 0.0 ;
+        Float driscScore = mlClient.getDriscScore(last10);
+
         DriscScore score = new DriscScore();
-        score.setScore((float) driscScore);
+        score.setScore(driscScore);
         score.setUserid(user);
         score.setTripsConsidered(last10.size());
         driscScoreRepository.save(score);
@@ -156,7 +162,7 @@ public class DriveSafeServiceImpl implements DriveSafeService {
         n.setMessage("DRISC Score updated: " + driscScore);
         notificationRepo.save(n);
 
-        return new DriscScoreDTO((float) driscScore, last10.size());
+        return new DriscScoreDTO(driscScore, last10.size());
     }
 
     //Get Notifications
@@ -223,75 +229,75 @@ public class DriveSafeServiceImpl implements DriveSafeService {
     }
 
     // 7️⃣ File Insurance Claim
-//    @Override
-//    public String fileClaim(InsuranceClaimDTO dto) {
-//        InsurancePolicy policy = policyRepo.findById(dto.policyId).orElseThrow();
-//
-//        InsuranceClaim claim = new InsuranceClaim();
-//        claim.setPolicy(policy);
-//        claim.setClaimNumber(dto.claimNumber);
-//        claim.setClaimDate(dto.claimDate);
-//        claim.setIncidentDate(dto.incidentDate);
-//        claim.setClaimAmount(dto.claimAmount);
-//        claim.setDescription(dto.description);
-//        claim.setClaimStatus(ClaimStatus.SUBMITTED);
-//
-//        claimRepo.save(claim);
-//        return "Claim filed successfully with number: " + claim.getClaimNumber();
-//    }
+   @Override
+    public String fileClaim(InsuranceClaimDTO dto) {
+        InsurancePolicy policy = policyRepo.findById(dto.policyId).orElseThrow();
 
-//    // 8️⃣ Get All Claims by Policy
-//    @Override
-//    public List<InsuranceClaimDTO> getClaimsByPolicy(Long policyId) {
-//        return claimRepo.findByPolicyId(policyId).stream()
-//                .map(claim -> new InsuranceClaimDTO(
-//                        claim.getPolicy().getId(),
-//                        claim.getClaimNumber(),
-//                        claim.getClaimDate(),
-//                        claim.getIncidentDate(),
-//                        claim.getClaimAmount(),
-//                        claim.getDescription()))
-//                .collect(Collectors.toList());
-//    }
+        InsuranceClaim claim = new InsuranceClaim();
+        claim.setPolicy(policy);
+        claim.setClaimNumber(dto.claimNumber);
+        claim.setClaimDate(dto.claimDate);
+        claim.setIncidentDate(dto.incidentDate);
+        claim.setClaimAmount(dto.claimAmount);
+        claim.setDescription(dto.description);
+       claim.setClaimStatus(ClaimStatus.SUBMITTED);
+        claim.setCreatedAt(LocalDateTime.now());
+        claimRepo.save(claim);
+       return "Claim filed successfully with number: " + claim.getClaimNumber();
+    }
+
+   // 8️⃣ Get All Claims by Policy
+    @Override
+    public List<InsuranceClaimDTO> getClaimsByPolicy(Long policyId) {
+        return claimRepo.findByPolicyId(policyId).stream()
+                .map(claim -> new InsuranceClaimDTO(
+                        claim.getPolicy().getId(),
+                       claim.getClaimNumber(),
+                        claim.getClaimDate(),
+                        claim.getIncidentDate(),
+                        claim.getClaimAmount(),
+                        claim.getDescription()))
+                .collect(Collectors.toList());
+    }
 
 
     // Upload Trip CSV File
 
 
-//    @Override
-//    public String uploadTripCsv(MultipartFile file, Long vehicleId) {
-//        Vehicle vehicle = vehicleRepo.findById(vehicleId)
-//                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
-//
-//        List<TripData> trips = new ArrayList<>();
-//
-//        try (Reader reader = new InputStreamReader(file.getInputStream());
-//             CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT
-//                     .withFirstRecordAsHeader()
-//                     .withIgnoreHeaderCase()
-//                     .withTrim())) {
-//
-//            for (CSVRecord record : parser) {
-//                TripData trip = new TripData();
-//                trip.setSpeed(Float.parseFloat(record.get("speed")));
-//                trip.setRpm(Float.parseFloat(record.get("rpm")));
-//                trip.setAcceleration(Float.parseFloat(record.get("acceleration")));
-//                trip.setThrottlePosition(Float.parseFloat(record.get("throttle_position")));
-//                trip.setEngineTemperature(Float.parseFloat(record.get("engine_temperature")));
-//                trip.setSystemVoltage(Float.parseFloat(record.get("system_voltage")));
-//                trip.setEngineLoadValue(Float.parseFloat(record.get("engine_load_value")));
-//                trip.setDistanceTravelled(Float.parseFloat(record.get("distance_travelled")));
-//                trip.setBrake(Float.parseFloat(record.get("brake")));
-//                trip.setVehicle(vehicle);
-//                trips.add(trip);
-//            }
-//
-//            tripRepo.saveAll(trips); // ✅ Batch save
-//            return "Uploaded " + trips.size() + " trips successfully.";
-//
-//        } catch (Exception e) {
-//            throw new RuntimeException("Failed to parse CSV: " + e.getMessage());
-//        }
-//    }
+  @Override
+   public String uploadTripCsv(MultipartFile file, Long vehicleId) {
+        Vehicle vehicle = vehicleRepo.findById(vehicleId)
+                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+
+        List<TripData> trips = new ArrayList<>();
+
+        try (Reader reader = new InputStreamReader(file.getInputStream());
+             CSVParser parser = new CSVParser(reader, CSVFormat.DEFAULT
+                     .withFirstRecordAsHeader()
+                     .withIgnoreHeaderCase()
+                     .withTrim())) {
+
+            for (CSVRecord record : parser) {
+                TripData trip = new TripData();
+                trip.setSpeed(Float.parseFloat(record.get("speed")));
+                trip.setRpm(Float.parseFloat(record.get("rpm")));
+                trip.setAcceleration(Float.parseFloat(record.get("acceleration")));
+                trip.setThrottlePosition(Float.parseFloat(record.get("throttle_position")));
+                trip.setEngineTemperature(Float.parseFloat(record.get("engine_temperature")));
+                trip.setSystemVoltage(Float.parseFloat(record.get("system_voltage")));
+                trip.setEngineLoadValue(Float.parseFloat(record.get("engine_load_value")));
+                trip.setDistanceTravelled(Float.parseFloat(record.get("distance_travelled")));
+                trip.setBrake(Float.parseFloat(record.get("brake")));
+                trip.setVehicle(vehicle);
+                trips.add(trip);
+            }
+
+           tripRepo.saveAll(trips); // ✅ Batch save
+            return "Uploaded " + trips.size() + " trips successfully.";
+
+        } catch (Exception e) {
+            throw new RuntimeException("Failed to parse CSV: " + e.getMessage());
+       }
+    }
 
 }
