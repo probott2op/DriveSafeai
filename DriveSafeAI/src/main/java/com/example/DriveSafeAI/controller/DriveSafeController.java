@@ -62,21 +62,21 @@ public class DriveSafeController {
     }
 
     // 7️⃣ File an insurance claim
-    @PostMapping("/insurance/claim")
-    public ResponseEntity<String> fileClaim(@RequestBody InsuranceClaimDTO dto) {
-        return ResponseEntity.ok(driveSafeService.fileClaim(dto));
-    }
+//    @PostMapping("/insurance/claim")
+//    public ResponseEntity<String> fileClaim(@RequestBody InsuranceClaimDTO dto) {
+//        return ResponseEntity.ok(driveSafeService.fileClaim(dto));
+//    }
 
     // 8️⃣ Get all claims for a policy
-    @GetMapping("/insurance/claim/{policyId}")
-    public ResponseEntity<List<InsuranceClaimDTO>> getClaimsByPolicy(@PathVariable Long policyId) {
-        return ResponseEntity.ok(driveSafeService.getClaimsByPolicy(policyId));
-    }
+//    @GetMapping("/insurance/claim/{policyId}")
+//    public ResponseEntity<List<InsuranceClaimDTO>> getClaimsByPolicy(@PathVariable Long policyId) {
+//        return ResponseEntity.ok(driveSafeService.getClaimsByPolicy(policyId));
+//    }
 //Adding CSV Upload Endpoint
-@PostMapping("/upload-trips/{vehicleId}")
-public ResponseEntity<String> uploadTrips(@RequestParam("file") MultipartFile file,
-                                          @PathVariable Long vehicleId) {
-    return ResponseEntity.ok(driveSafeService.uploadTripCsv(file, vehicleId));
-}
+//@PostMapping("/upload-trips/{vehicleId}")
+//public ResponseEntity<String> uploadTrips(@RequestParam("file") MultipartFile file,
+//                                          @PathVariable Long vehicleId) {
+//    return ResponseEntity.ok(driveSafeService.uploadTripCsv(file, vehicleId));
+//}
 
 }
