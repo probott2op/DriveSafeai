@@ -5,6 +5,7 @@ import com.example.DriveSafeAI.service.DriveSafeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -20,6 +21,15 @@ public class DriveSafeController {
     public ResponseEntity<UserResponseDTO> registerUser(@RequestBody UserRegisterDTO dto) {
         return ResponseEntity.ok(driveSafeService.registerUser(dto));
     }
+
+    // User login
+    @PostMapping("/login")
+    public ResponseEntity<String> login(@RequestBody LoginRequestDTO dto) {
+        return ResponseEntity.ok(driveSafeService.login(dto));
+    }
+
+
+
 
     // 2️⃣ Submit trip data and get DriveScore
     @PostMapping("/trip")
@@ -62,4 +72,11 @@ public class DriveSafeController {
     public ResponseEntity<List<InsuranceClaimDTO>> getClaimsByPolicy(@PathVariable Long policyId) {
         return ResponseEntity.ok(driveSafeService.getClaimsByPolicy(policyId));
     }
+//Adding CSV Upload Endpoint
+@PostMapping("/upload-trips/{vehicleId}")
+public ResponseEntity<String> uploadTrips(@RequestParam("file") MultipartFile file,
+                                          @PathVariable Long vehicleId) {
+    return ResponseEntity.ok(driveSafeService.uploadTripCsv(file, vehicleId));
+}
+
 }

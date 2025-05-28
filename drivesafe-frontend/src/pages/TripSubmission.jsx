@@ -1,6 +1,7 @@
-import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
-import axios from 'axios';
 import { useState } from 'react';
+import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
+import { useAuth } from '../context/AuthContext';
+import { tripAPI } from '../services/apiService';
 
 const TripSubmission = () => {
   const [tripData, setTripData] = useState({
@@ -19,6 +20,8 @@ const TripSubmission = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
+  const { user } = useAuth();
+
   const handleChange = (e) => {
     setTripData({
       ...tripData,
@@ -33,10 +36,24 @@ const TripSubmission = () => {
     setResponse(null);
 
     try {
-      const response = await axios.post('/api/trip', tripData);
+      const response = await tripAPI.submitTrip(tripData);
       setResponse(response.data);
+      
+      // Reset form after successful submission
+      setTripData({
+        speed: '',
+        rpm: '',
+        acceleration: '',
+        throttlePosition: '',
+        engineTemperature: '',
+        systemVoltage: '',
+        engineLoadValue: '',
+        distanceTravelled: '',
+        brake: '',
+        vehicleId: ''
+      });
     } catch (err) {
-      setError('Failed to submit trip data');
+      setError(err.response?.data?.message || 'Failed to submit trip data');
     } finally {
       setLoading(false);
     }
@@ -53,6 +70,7 @@ const TripSubmission = () => {
       <Row>
         <Col>
           <h2>Submit Trip Data</h2>
+          <p className="text-muted">Record your driving data for AI analysis</p>
         </Col>
       </Row>
       
@@ -216,6 +234,15 @@ const TripSubmission = () => {
                 <hr />
                 <h6>Feedback:</h6>
                 <p className="text-muted">{response.feedback}</p>
+                
+                <Button 
+                  variant="outline-primary" 
+                  size="sm" 
+                  className="w-100 mt-3"
+                  onClick={() => window.location.href = '/dashboard'}
+                >
+                  View Dashboard
+                </Button>
               </Card.Body>
             </Card>
           )}

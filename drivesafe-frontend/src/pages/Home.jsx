@@ -1,15 +1,39 @@
+
 import { Container, Row, Col, Card, Button } from 'react-bootstrap';
 import { useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
 
 const Home = () => {
   const navigate = useNavigate();
+  const { isAuthenticated } = useAuth();
 
   return (
     <Container className="mt-5">
       <Row className="text-center mb-5">
         <Col>
-          <h1 className="display-4">Welcome to DriveSafeAI</h1>
-          <p className="lead">AI-powered driving safety and insurance platform</p>
+          <div className="bg-primary text-white p-5 rounded mb-4">
+            <h1 className="display-4">Welcome to DriveSafeAI</h1>
+            <p className="lead">AI-powered driving safety and insurance platform</p>
+            {!isAuthenticated() && (
+              <div className="mt-4">
+                <Button 
+                  variant="light" 
+                  size="lg" 
+                  className="me-3"
+                  onClick={() => navigate('/login')}
+                >
+                  Login
+                </Button>
+                <Button 
+                  variant="outline-light" 
+                  size="lg"
+                  onClick={() => navigate('/register')}
+                >
+                  Register
+                </Button>
+              </div>
+            )}
+          </div>
         </Col>
       </Row>
       
@@ -21,9 +45,15 @@ const Home = () => {
               <Card.Text>
                 Get real-time feedback on your driving performance with our AI-powered analysis system.
               </Card.Text>
-              <Button variant="primary" onClick={() => navigate('/trip')}>
-                Submit Trip Data
-              </Button>
+              {isAuthenticated() ? (
+                <Button variant="primary" onClick={() => navigate('/trip')}>
+                  Submit Trip Data
+                </Button>
+              ) : (
+                <Button variant="outline-primary" onClick={() => navigate('/login')}>
+                  Login to Access
+                </Button>
+              )}
             </Card.Body>
           </Card>
         </Col>
@@ -35,9 +65,15 @@ const Home = () => {
               <Card.Text>
                 Monitor your DriscScore and understand your driving risk profile for better insurance rates.
               </Card.Text>
-              <Button variant="success" onClick={() => navigate('/dashboard')}>
-                View Dashboard
-              </Button>
+              {isAuthenticated() ? (
+                <Button variant="success" onClick={() => navigate('/dashboard')}>
+                  View Dashboard
+                </Button>
+              ) : (
+                <Button variant="outline-success" onClick={() => navigate('/login')}>
+                  Login to Access
+                </Button>
+              )}
             </Card.Body>
           </Card>
         </Col>
@@ -49,19 +85,17 @@ const Home = () => {
               <Card.Text>
                 Manage your insurance policies and claims with personalized premium calculations.
               </Card.Text>
-              <Button variant="info" onClick={() => navigate('/insurance')}>
-                Manage Insurance
-              </Button>
+              {isAuthenticated() ? (
+                <Button variant="info" onClick={() => navigate('/insurance')}>
+                  Manage Insurance
+                </Button>
+              ) : (
+                <Button variant="outline-info" onClick={() => navigate('/login')}>
+                  Login to Access
+                </Button>
+              )}
             </Card.Body>
           </Card>
-        </Col>
-      </Row>
-      
-      <Row className="mt-5">
-        <Col className="text-center">
-          <Button variant="outline-primary" size="lg" onClick={() => navigate('/register')}>
-            Get Started - Register Now
-          </Button>
         </Col>
       </Row>
     </Container>

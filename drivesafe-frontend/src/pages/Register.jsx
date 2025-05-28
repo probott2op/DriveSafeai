@@ -1,7 +1,7 @@
+import React, { useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
-import axios from 'axios';
-import { useState } from 'react';
-
+import { useNavigate, Link } from 'react-router-dom';
+import { authAPI } from '../services/apiService';
 
 const Register = () => {
   const [formData, setFormData] = useState({
@@ -18,6 +18,8 @@ const Register = () => {
   const [message, setMessage] = useState('');
   const [error, setError] = useState('');
 
+  const navigate = useNavigate();
+
   const handleChange = (e) => {
     setFormData({
       ...formData,
@@ -32,8 +34,10 @@ const Register = () => {
     setMessage('');
 
     try {
-      const response = await axios.post('/api/register', formData);
-      setMessage(`Registration successful! User ID: ${response.data.userId}`);
+      const response = await authAPI.register(formData);
+      setMessage(`Registration successful! User ID: ${response.data.userId}. Please login to continue.`);
+      
+      // Reset form
       setFormData({
         fullName: '',
         email: '',
@@ -44,8 +48,13 @@ const Register = () => {
         model: '',
         manufacturer: ''
       });
+      
+      // Redirect to login after 2 seconds
+      setTimeout(() => {
+        navigate('/login');
+      }, 2000);
     } catch (err) {
-      setError('Registration failed. Please try again.');
+      setError(err.response?.data?.message || 'Registration failed. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -164,6 +173,10 @@ const Register = () => {
                   {loading ? 'Registering...' : 'Register'}
                 </Button>
               </Form>
+              
+              <div className="text-center mt-3">
+                <p>Already have an account? <Link to="/login">Login here</Link></p>
+              </div>
             </Card.Body>
           </Card>
         </Col>

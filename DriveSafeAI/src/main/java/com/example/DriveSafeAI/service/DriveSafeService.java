@@ -1,11 +1,15 @@
 package com.example.DriveSafeAI.service;
 
 import com.example.DriveSafeAI.dto.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 public interface DriveSafeService {
     UserResponseDTO registerUser(UserRegisterDTO dto);
+
+    String login(LoginRequestDTO dto);
+
 
     TripResponseDTO submitTrip(TripRequestDTO dto);
 
@@ -20,4 +24,9 @@ public interface DriveSafeService {
     String fileClaim(InsuranceClaimDTO dto);
 
     List<InsuranceClaimDTO> getClaimsByPolicy(Long policyId);
+
+
+//upload trip csv file
+    String uploadTripCsv(MultipartFile file, Long vehicleId);
+
 }
