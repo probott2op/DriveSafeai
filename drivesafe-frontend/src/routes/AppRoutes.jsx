@@ -13,6 +13,8 @@ import Claims from '../pages/Claims';
 import Notifications from '../pages/Notifications';
 import ProtectedRoute from './ProtectedRoute';
 import LoadingSpinner from '../components/LoadingSpinner';
+import OBDSimulator from '../pages/OBDSimulator';
+import Sender from '../pages/Sender';
 
 const AppRoutes = () => {
   const { loading } = useAuth();
@@ -28,16 +30,18 @@ const AppRoutes = () => {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        
+        <Route path="/bluetooth" element={<OBDSimulator />} />
+        <Route path="/sender" element={<Sender />} />
+
         {/* Protected Routes */}
-        <Route element={<ProtectedRoute />}>
+        {/* <Route element={<ProtectedRoute />}> */}
           <Route path="/dashboard" element={<Dashboard />} />
           <Route path="/trip" element={<TripSubmission />} />
           <Route path="/trip-history" element={<TripHistory />} />
           <Route path="/insurance" element={<Insurance />} />
           <Route path="/claims" element={<Claims />} />
           <Route path="/notifications" element={<Notifications />} />
-        </Route>
+        {/* </Route> */}
         
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>
