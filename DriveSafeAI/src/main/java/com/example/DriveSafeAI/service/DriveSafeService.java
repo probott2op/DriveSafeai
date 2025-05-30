@@ -29,4 +29,7 @@ public interface DriveSafeService {
 //upload trip csv file
     String uploadTripCsv(MultipartFile file, Long vehicleId);
 
+    //for continous live data from frontend
+    TripResponseDTO processLiveTripSession(String sessionId);
+
 }

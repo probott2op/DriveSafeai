@@ -10,6 +10,7 @@ import com.example.DriveSafeAI.service.security.JWTService;
 //import org.apache.commons.csv.CSVFormat;
 //import org.apache.commons.csv.CSVParser;
 //import org.apache.commons.csv.CSVRecord;
+import com.example.DriveSafeAI.util.TripSessionBuffer;
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
@@ -298,6 +299,56 @@ public class DriveSafeServiceImpl implements DriveSafeService {
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse CSV: " + e.getMessage());
        }
+
     }
+
+    //for live data fromm frontend
+
+    @Override
+    public TripResponseDTO processLiveTripSession(String sessionId) {
+        List<LiveTripDTO> dataList = TripSessionBuffer.endSession(sessionId);
+        if (dataList == null || dataList.isEmpty()) {
+            throw new RuntimeException("No trip data found for session: " + sessionId);
+        }
+
+        Long vehicleId = dataList.get(0).getVehicleId();
+        Vehicle vehicle = vehicleRepo.findById(vehicleId)
+                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+
+        List<TripData> tripList = new ArrayList<>();
+        for (LiveTripDTO dto : dataList) {
+            TripData t = new TripData();
+            t.setSpeed(dto.getSpeed());
+            t.setRpm(dto.getRpm());
+            t.setAcceleration(dto.getAcceleration());
+            t.setThrottlePosition(dto.getThrottlePosition());
+            t.setEngineTemperature(dto.getEngineTemperature());
+            t.setSystemVoltage(dto.getSystemVoltage());
+            t.setDistanceTravelled(dto.getDistanceTravelled());
+            t.setEngineLoadValue(dto.getEngineLoadValue());
+            t.setBrake(dto.getBrake());
+            t.setVehicle(vehicle);
+            tripList.add(t);
+        }
+
+        tripRepo.saveAll(tripList);
+
+        Float driveScore = mlClient.getDriveScoreFromList(tripList);
+
+        DriveScore score = new DriveScore();
+        score.setScore(driveScore);
+        score.setVehicle(vehicle);
+        score.setTripData(tripList.get(tripList.size() - 1)); // Use last row
+        driveScoreRepo.save(score);
+
+        Notification note = new Notification();
+        note.setUser(vehicle.getUser());
+        note.setMessage("Live trip session completed. Drive Score: " + driveScore);
+        notificationRepo.save(note);
+
+        return new TripResponseDTO(score.getTripData().getId(), driveScore,
+                driveScore > 80 ? "Excellent driving!" : "Needs improvement");
+    }
+
 
 }

@@ -2,6 +2,7 @@ package com.example.DriveSafeAI.controller;
 
 import com.example.DriveSafeAI.dto.*;
 import com.example.DriveSafeAI.service.DriveSafeService;
+import com.example.DriveSafeAI.util.TripSessionBuffer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -78,5 +79,18 @@ public ResponseEntity<String> uploadTrips(@RequestParam("file") MultipartFile fi
                                           @PathVariable Long vehicleId) {
     return ResponseEntity.ok(driveSafeService.uploadTripCsv(file, vehicleId));
 }
+
+    @PostMapping("/live")
+    public ResponseEntity<String> receiveLiveTrip(@RequestBody LiveTripDTO dto) {
+        TripSessionBuffer.addToSession(dto.getSessionId(), dto);
+        return ResponseEntity.ok("Received one data point for session: " + dto.getSessionId());
+    }
+
+    @PostMapping("/end-session/{sessionId}")
+    public ResponseEntity<TripResponseDTO> endSession(@PathVariable String sessionId) {
+        return ResponseEntity.ok(driveSafeService.processLiveTripSession(sessionId));
+    }
+
+
 
 }
