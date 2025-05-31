@@ -6,6 +6,8 @@ const Dashboard = () => {
   const [userData, setUserData] = useState(null);
   const [driscScore, setDriscScore] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [scoreLoading, setScoreLoading] = useState(false);
+  const [numberOfTrips, setNumberOfTrips] = useState(1);
   const navigate = useNavigate();
 
   useEffect(() => {
@@ -15,7 +17,7 @@ const Dashboard = () => {
         if (currentUser) {
           const [user, score] = await Promise.all([
             UserService.getUserById(currentUser),
-            UserService.getDriscScore(currentUser)
+            UserService.getDriscScore(currentUser, numberOfTrips)
           ]);
           setUserData(user);
           setDriscScore(score);
@@ -29,7 +31,25 @@ const Dashboard = () => {
     };
 
     fetchData();
-  }, []);
+  }, [numberOfTrips]);
+
+  const handleTripsChange = async (newN) => {
+    setNumberOfTrips(newN);
+    setScoreLoading(true);
+
+    try {
+      const currentUser = localStorage.getItem('userId');
+      if (currentUser) {
+        const score = await UserService.getDriscScore(currentUser, newN);
+        setDriscScore(score);
+        console.log('Updated DRISC Score data:', score);
+      }
+    } catch (error) {
+      console.error('Error fetching updated score:', error);
+    } finally {
+      setScoreLoading(false);
+    }
+  };
 
   const getRiskLevel = (score) => {
     if (score >= 80) return { level: 'Low', color: '#10b981', symbol: '✓' };
@@ -44,7 +64,7 @@ const Dashboard = () => {
   };
 
   const handleStartTrip = () => {
-      navigate("/trip-monitor");
+    navigate("/trip-monitor");
   };
 
   if (loading) {
@@ -141,6 +161,19 @@ const Dashboard = () => {
     transition: 'width 1s ease-in-out'
   });
 
+  const selectStyle = {
+    background: 'white',
+    border: '2px solid #e5e7eb',
+    borderRadius: '8px',
+    padding: '6px 12px',
+    fontSize: '14px',
+    fontWeight: '600',
+    color: '#374151',
+    cursor: 'pointer',
+    outline: 'none',
+    transition: 'all 0.3s ease'
+  };
+
   return (
       <div style={{
         minHeight: '100vh',
@@ -210,7 +243,11 @@ const Dashboard = () => {
           }}>
             {/* Risk Score Card */}
             <div
-                style={statCardStyle}
+                style={{
+                  ...statCardStyle,
+                  minHeight: '180px', // Increased height to accommodate the selector
+                  opacity: scoreLoading ? 0.7 : 1
+                }}
                 onMouseEnter={(e) => e.target.style.transform = 'translateY(-4px)'}
                 onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
             >
@@ -225,7 +262,7 @@ const Dashboard = () => {
                     fontWeight: '700',
                     color: getScoreColor(driscScore?.score || 0)
                   }}>
-                    {driscScore?.score?.toFixed(1) || '0.0'}
+                    {scoreLoading ? '...' : (driscScore?.score?.toFixed(1) || '0.0')}
                   </h3>
                 </div>
                 <div style={{
@@ -241,7 +278,31 @@ const Dashboard = () => {
                   📊
                 </div>
               </div>
-              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '16px' }}>
+
+              {/* Trips Selector */}
+              <div style={{ margin: '16px 0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '8px' }}>
+                  <span style={{ fontSize: '14px', fontWeight: '600', color: '#374151' }}>Number of trips:</span>
+                  <select
+                      value={numberOfTrips}
+                      onChange={(e) => handleTripsChange(parseInt(e.target.value))}
+                      style={{
+                        ...selectStyle,
+                        borderColor: scoreLoading ? '#9ca3af' : '#e5e7eb'
+                      }}
+                      disabled={scoreLoading}
+                  >
+                    {[1, 2, 3, 4, 5, 10, 15, 20, 25, 30].map(num => (
+                        <option key={num} value={num}>N = {num}</option>
+                    ))}
+                  </select>
+                </div>
+                <p style={{ margin: 0, fontSize: '12px', color: '#6b7280' }}>
+                  {scoreLoading ? 'Calculating...' : `Based on last ${numberOfTrips} trip${numberOfTrips !== 1 ? 's' : ''}`}
+                </p>
+              </div>
+
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                 <span>📈</span>
                 <small style={{ color: '#6b7280' }}>Risk assessment</small>
               </div>
@@ -334,7 +395,7 @@ const Dashboard = () => {
                     PREMIUM IMPACT
                   </p>
                   <h3 style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#10b981' }}>
-                    {driscScore?.score >= 80 ? '↓ 15%' : driscScore?.score >= 60 ? '→ 0%' : '↑ 25%'}
+                    {driscScore?.score ? `${100 - driscScore.score}% Saved` : '0% Saved'}
                   </h3>
                 </div>
                 <div style={{
@@ -448,8 +509,8 @@ const Dashboard = () => {
                   <div style={progressFillStyle(driscScore?.score || 0, getScoreColor(driscScore?.score || 0))}></div>
                 </div>
                 <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#6b7280' }}>
-                  <span>Based on {tripsCount} trip{tripsCount !== 1 ? 's' : ''}</span>
-                  <span>{tripsCount < 5 ? 'More trips needed for accuracy' : 'Sufficient data'}</span>
+                  <span>Based on {numberOfTrips} trip{numberOfTrips !== 1 ? 's' : ''}</span>
+                  <span>{numberOfTrips < 5 ? 'More trips needed for accuracy' : 'Sufficient data'}</span>
                 </div>
               </div>
 
@@ -494,27 +555,27 @@ const Dashboard = () => {
             <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
               {[
                 {
-                  icon: tripsCount >= 5 ? "✅" : "ℹ️",
-                  title: tripsCount >= 5 ? "Good Score!" : "Getting Started",
-                  message: tripsCount >= 5
+                  icon: numberOfTrips >= 5 ? "✅" : "ℹ️",
+                  title: numberOfTrips >= 5 ? "Good Score!" : "Getting Started",
+                  message: numberOfTrips >= 5
                       ? "Your driving behavior shows low risk patterns."
-                      : `Complete ${5 - tripsCount} more trips for accurate scoring.`,
-                  color: tripsCount >= 5 ? '#3b82f6' : '#06b6d4'
+                      : `Try increasing N to ${Math.min(numberOfTrips + 2, 10)} for more comprehensive scoring.`,
+                  color: numberOfTrips >= 5 ? '#3b82f6' : '#06b6d4'
                 },
                 {
                   icon: "⚠️",
-                  title: "More Data Needed",
-                  message: tripsCount < 10
-                      ? "Complete more trips for better accuracy."
+                  title: "Data Analysis",
+                  message: numberOfTrips < 10
+                      ? "Consider analyzing more trips for better accuracy."
                       : "Your data is comprehensive for analysis.",
                   color: '#f59e0b'
                 },
                 {
                   icon: "💰",
                   title: "Premium Benefits",
-                  message: tripsCount >= 5
+                  message: numberOfTrips >= 5
                       ? "Eligible for reduced insurance premiums."
-                      : "Complete more trips to unlock premium benefits.",
+                      : "Analyze more trips to unlock premium benefits.",
                   color: '#10b981'
                 }
               ].map((rec, index) => (

@@ -1,460 +1,493 @@
 import React, { useState, useEffect } from 'react';
-import UserService from '../../services/UserService';
+import { Shield, Calendar, DollarSign, FileText, TrendingUp, Award } from 'lucide-react';
+import UserService from "../../services/UserService.js";
 
-export default function InsurancePremiumDisplay() {
-    const [insuranceData, setInsuranceData] = useState(null);
+const InsurancePage = () => {
+    const [policyData, setPolicyData] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [selectedCard, setSelectedCard] = useState(null);
-    const [animateNumbers, setAnimateNumbers] = useState(false);
+    const [animateIn, setAnimateIn] = useState(false);
 
     useEffect(() => {
+        // Simulate API call - replace with actual UserService.getInsurance()
         const fetchInsuranceData = async () => {
             try {
                 const userId = localStorage.getItem('userId');
                 const data = await UserService.getInsurance(userId);
-                setInsuranceData(data);
-                setLoading(false);
-                setTimeout(() => setAnimateNumbers(true), 500);
+                setPolicyData(data);
+                setTimeout(() => {
+                    setPolicyData(data);
+                    setLoading(false);
+                    setAnimateIn(true);
+                }, 1000);
             } catch (error) {
                 console.error('Error fetching insurance data:', error);
-                // Mock data for demonstration
-                setInsuranceData({
-                    policyId: 12345678,
-                    riskScore: 7.8,
-                    riskCategory: "MEDIUM",
-                    basePremium: 1200.50,
-                    riskMultiplier: 1.25,
-                    finalPremium: 1500.63
-                });
                 setLoading(false);
-                setTimeout(() => setAnimateNumbers(true), 500);
             }
         };
 
         fetchInsuranceData();
     }, []);
 
-    const getRiskColor = (category) => {
-        switch(category?.toLowerCase()) {
-            case 'low': return '#4ade80';
-            case 'medium': return '#fbbf24';
-            case 'high': return '#f87171';
-            default: return '#6b7280';
-        }
+    const formatCurrency = (amount) => {
+        return new Intl.NumberFormat('en-US', {
+            style: 'currency',
+            currency: 'INR',
+            minimumFractionDigits: 2
+        }).format(amount);
     };
 
-    const getRiskGradient = (category) => {
-        switch(category?.toLowerCase()) {
-            case 'low': return 'linear-gradient(135deg, #dcfce7 0%, #bbf7d0 100%)';
-            case 'medium': return 'linear-gradient(135deg, #fef3c7 0%, #fde68a 100%)';
-            case 'high': return 'linear-gradient(135deg, #fee2e2 0%, #fecaca 100%)';
-            default: return 'linear-gradient(135deg, #f3f4f6 0%, #e5e7eb 100%)';
-        }
+    const formatDate = (dateString) => {
+        return new Date(dateString).toLocaleDateString('en-US', {
+            year: 'numeric',
+            month: 'long',
+            day: 'numeric'
+        });
+    };
+
+    const calculateDaysRemaining = (endDate) => {
+        const today = new Date();
+        const end = new Date(endDate);
+        const diffTime = end - today;
+        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+        return diffDays;
     };
 
     if (loading) {
         return (
             <div style={{
-                display: 'flex',
-                justifyContent: 'center',
-                alignItems: 'center',
-                minHeight: '400px',
+                minHeight: '100vh',
                 background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                fontFamily: 'system-ui, -apple-system, sans-serif'
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
             }}>
                 <div style={{
-                    width: '60px',
-                    height: '60px',
-                    border: '4px solid rgba(255,255,255,0.3)',
-                    borderTop: '4px solid white',
-                    borderRadius: '50%',
-                    animation: 'spin 1s linear infinite'
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: '20px'
                 }}>
-                    <style>
-                        {`
-              @keyframes spin {
-                0% { transform: rotate(0deg); }
-                100% { transform: rotate(360deg); }
-              }
-            `}
-                    </style>
+                    <div style={{
+                        width: '60px',
+                        height: '60px',
+                        border: '4px solid rgba(255,255,255,0.3)',
+                        borderTop: '4px solid white',
+                        borderRadius: '50%',
+                        animation: 'spin 1s linear infinite'
+                    }}></div>
+                    <p style={{ color: 'white', fontSize: '18px', margin: 0 }}>Loading your policy details...</p>
+                </div>
+                <style>
+                    {`
+            @keyframes spin {
+              0% { transform: rotate(0deg); }
+              100% { transform: rotate(360deg); }
+            }
+          `}
+                </style>
+            </div>
+        );
+    }
+
+    if (!policyData) {
+        return (
+            <div style={{
+                minHeight: '100vh',
+                background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+            }}>
+                <div style={{
+                    background: 'rgba(255,255,255,0.1)',
+                    backdropFilter: 'blur(10px)',
+                    padding: '40px',
+                    borderRadius: '20px',
+                    textAlign: 'center',
+                    color: 'white'
+                }}>
+                    <h2 style={{ margin: '0 0 10px 0' }}>Unable to load policy data</h2>
+                    <p style={{ margin: 0, opacity: 0.8 }}>Please try again later</p>
                 </div>
             </div>
         );
     }
 
+    const daysRemaining = calculateDaysRemaining(policyData.policyEndDate);
+
     return (
         <div style={{
             minHeight: '100vh',
             background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-            padding: '20px',
-            fontFamily: 'system-ui, -apple-system, sans-serif'
+            fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif',
+            padding: '20px'
         }}>
-            <style>
-                {`
-          @keyframes slideInUp {
-            from {
-              opacity: 0;
-              transform: translateY(30px);
-            }
-            to {
-              opacity: 1;
-              transform: translateY(0);
-            }
-          }
-          
-          @keyframes pulse {
-            0%, 100% {
-              transform: scale(1);
-            }
-            50% {
-              transform: scale(1.05);
-            }
-          }
-          
-          @keyframes countUp {
-            from {
-              opacity: 0;
-              transform: scale(0.5);
-            }
-            to {
-              opacity: 1;
-              transform: scale(1);
-            }
-          }
-          
-          @keyframes glow {
-            0%, 100% {
-              box-shadow: 0 4px 20px rgba(255,255,255,0.3);
-            }
-            50% {
-              box-shadow: 0 8px 40px rgba(255,255,255,0.5);
-            }
-          }
-          
-          .card {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-          }
-          
-          .card:hover {
-            transform: translateY(-8px) scale(1.02);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-          }
-          
-          .number-animate {
-            animation: ${animateNumbers ? 'countUp 0.8s ease-out' : 'none'};
-          }
-        `}
-            </style>
-
             <div style={{
                 maxWidth: '1200px',
                 margin: '0 auto',
-                animation: 'slideInUp 0.6s ease-out'
+                transform: animateIn ? 'translateY(0)' : 'translateY(30px)',
+                opacity: animateIn ? 1 : 0,
+                transition: 'all 0.8s cubic-bezier(0.4, 0, 0.2, 1)'
             }}>
+                {/* Header */}
                 <div style={{
                     textAlign: 'center',
                     marginBottom: '40px',
                     color: 'white'
                 }}>
-                    <h1 style={{
-                        fontSize: '3rem',
-                        fontWeight: 'bold',
-                        margin: '0 0 10px 0',
-                        textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
+                    <div style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '15px',
+                        marginBottom: '20px'
                     }}>
-                        Insurance Premium Calculator
-                    </h1>
+                        <Shield size={40} style={{ color: '#ffd700' }} />
+                        <h1 style={{
+                            margin: 0,
+                            fontSize: '2.5rem',
+                            fontWeight: '700',
+                            background: 'linear-gradient(45deg, #ffd700, #ffed4e)',
+                            WebkitBackgroundClip: 'text',
+                            WebkitTextFillColor: 'transparent',
+                            backgroundClip: 'text'
+                        }}>
+                            Insurance Dashboard
+                        </h1>
+                    </div>
                     <p style={{
-                        fontSize: '1.2rem',
-                        opacity: '0.9',
-                        margin: '0'
+                        margin: 0,
+                        fontSize: '1.1rem',
+                        opacity: 0.9,
+                        fontWeight: '300'
                     }}>
-                        Policy #{insuranceData?.policyId}
+                        Your comprehensive policy overview
                     </p>
                 </div>
 
+                {/* Status Card */}
+                <div style={{
+                    background: daysRemaining > 30 ? 'linear-gradient(135deg, #4ade80, #22c55e)' :
+                        daysRemaining > 7 ? 'linear-gradient(135deg, #fbbf24, #f59e0b)' :
+                            'linear-gradient(135deg, #ef4444, #dc2626)',
+                    borderRadius: '20px',
+                    padding: '25px',
+                    marginBottom: '30px',
+                    color: 'white',
+                    textAlign: 'center',
+                    boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+                    transform: 'translateY(0)',
+                    transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+                }}
+                     onMouseEnter={(e) => {
+                         e.currentTarget.style.transform = 'translateY(-5px)';
+                         e.currentTarget.style.boxShadow = '0 25px 50px rgba(0,0,0,0.15)';
+                     }}
+                     onMouseLeave={(e) => {
+                         e.currentTarget.style.transform = 'translateY(0)';
+                         e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.1)';
+                     }}>
+                    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', marginBottom: '10px' }}>
+                        <Calendar size={24} />
+                        <h3 style={{ margin: 0, fontSize: '1.3rem' }}>Policy Status</h3>
+                    </div>
+                    <p style={{ margin: 0, fontSize: '1.1rem', opacity: 0.9 }}>
+                        {daysRemaining > 0 ? `${daysRemaining} days remaining` : 'Policy Expired'}
+                    </p>
+                </div>
+
+                {/* Main Grid */}
                 <div style={{
                     display: 'grid',
-                    gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
-                    gap: '20px',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+                    gap: '25px',
                     marginBottom: '30px'
                 }}>
-                    {/* Risk Score Card */}
-                    <div
-                        className="card"
-                        style={{
-                            background: 'white',
-                            borderRadius: '20px',
-                            padding: '30px',
-                            boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-                            cursor: 'pointer',
-                            animation: selectedCard === 'risk' ? 'glow 2s infinite' : 'none'
-                        }}
-                        onClick={() => setSelectedCard(selectedCard === 'risk' ? null : 'risk')}
-                    >
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            marginBottom: '20px'
-                        }}>
+                    {/* Policy Information Card */}
+                    <div style={{
+                        background: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(20px)',
+                        borderRadius: '20px',
+                        padding: '30px',
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        transform: 'translateY(0)',
+                        transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+                    }}
+                         onMouseEnter={(e) => {
+                             e.currentTarget.style.transform = 'translateY(-5px)';
+                             e.currentTarget.style.boxShadow = '0 25px 50px rgba(0,0,0,0.15)';
+                         }}
+                         onMouseLeave={(e) => {
+                             e.currentTarget.style.transform = 'translateY(0)';
+                             e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.1)';
+                         }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px' }}>
                             <div style={{
-                                width: '50px',
-                                height: '50px',
-                                borderRadius: '50%',
-                                background: 'linear-gradient(135deg, #ff6b6b, #ee5a24)',
+                                background: 'linear-gradient(135deg, #667eea, #764ba2)',
+                                borderRadius: '12px',
+                                padding: '12px',
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                                marginRight: '15px'
-                            }}>
-                                <span style={{ color: 'white', fontSize: '24px' }}>⚡</span>
-                            </div>
-                            <h3 style={{
-                                margin: '0',
-                                fontSize: '1.4rem',
-                                color: '#333'
-                            }}>Risk Assessment</h3>
-                        </div>
-
-                        <div style={{
-                            background: getRiskGradient(insuranceData?.riskCategory),
-                            borderRadius: '15px',
-                            padding: '20px',
-                            marginBottom: '15px'
-                        }}>
-                            <div style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                marginBottom: '10px'
-                            }}>
-                                <span style={{ fontWeight: 'bold', color: '#333' }}>Risk Score</span>
-                                <span
-                                    className="number-animate"
-                                    style={{
-                                        fontSize: '2rem',
-                                        fontWeight: 'bold',
-                                        color: getRiskColor(insuranceData?.riskCategory)
-                                    }}
-                                >
-                  {insuranceData?.riskScore}/10
-                </span>
-                            </div>
-
-                            <div style={{
-                                background: 'rgba(255,255,255,0.5)',
-                                borderRadius: '10px',
-                                height: '10px',
-                                marginBottom: '15px',
-                                overflow: 'hidden'
-                            }}>
-                                <div style={{
-                                    background: getRiskColor(insuranceData?.riskCategory),
-                                    height: '100%',
-                                    width: `${(insuranceData?.riskScore / 10) * 100}%`,
-                                    borderRadius: '10px',
-                                    transition: 'width 1s ease-out',
-                                    animation: animateNumbers ? 'slideInUp 1s ease-out 0.3s both' : 'none'
-                                }}></div>
-                            </div>
-
-                            <div style={{
-                                display: 'flex',
                                 justifyContent: 'center'
                             }}>
-                <span style={{
-                    background: getRiskColor(insuranceData?.riskCategory),
-                    color: 'white',
-                    padding: '8px 20px',
-                    borderRadius: '20px',
-                    fontWeight: 'bold',
-                    fontSize: '0.9rem',
-                    textTransform: 'uppercase',
-                    letterSpacing: '1px'
-                }}>
-                  {insuranceData?.riskCategory} RISK
-                </span>
+                                <FileText size={24} style={{ color: 'white' }} />
+                            </div>
+                            <h2 style={{ margin: 0, color: '#1f2937', fontSize: '1.4rem', fontWeight: '600' }}>
+                                Policy Information
+                            </h2>
+                        </div>
+
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.9rem', color: '#6b7280', marginBottom: '5px', fontWeight: '500' }}>
+                                    Policy Number
+                                </label>
+                                <p style={{ margin: 0, fontSize: '1.1rem', color: '#1f2937', fontWeight: '600' }}>
+                                    {policyData.policyNumber}
+                                </p>
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.9rem', color: '#6b7280', marginBottom: '5px', fontWeight: '500' }}>
+                                    Policy ID
+                                </label>
+                                <p style={{ margin: 0, fontSize: '1.1rem', color: '#1f2937', fontWeight: '600' }}>
+                                    #{policyData.policyId}
+                                </p>
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.9rem', color: '#6b7280', marginBottom: '5px', fontWeight: '500' }}>
+                                    Coverage Type
+                                </label>
+                                <p style={{ margin: 0, fontSize: '1.1rem', color: '#1f2937', fontWeight: '600' }}>
+                                    {policyData.coverageType}
+                                </p>
                             </div>
                         </div>
                     </div>
 
-                    {/* Premium Calculation Card */}
-                    <div
-                        className="card"
-                        style={{
-                            background: 'white',
-                            borderRadius: '20px',
-                            padding: '30px',
-                            boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-                            cursor: 'pointer',
-                            animation: selectedCard === 'premium' ? 'glow 2s infinite' : 'none'
-                        }}
-                        onClick={() => setSelectedCard(selectedCard === 'premium' ? null : 'premium')}
-                    >
-                        <div style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            marginBottom: '20px'
-                        }}>
+                    {/* Financial Details Card */}
+                    <div style={{
+                        background: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(20px)',
+                        borderRadius: '20px',
+                        padding: '30px',
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        transform: 'translateY(0)',
+                        transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+                    }}
+                         onMouseEnter={(e) => {
+                             e.currentTarget.style.transform = 'translateY(-5px)';
+                             e.currentTarget.style.boxShadow = '0 25px 50px rgba(0,0,0,0.15)';
+                         }}
+                         onMouseLeave={(e) => {
+                             e.currentTarget.style.transform = 'translateY(0)';
+                             e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.1)';
+                         }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px' }}>
                             <div style={{
-                                width: '50px',
-                                height: '50px',
-                                borderRadius: '50%',
-                                background: 'linear-gradient(135deg, #4ecdc4, #44a08d)',
+                                background: 'linear-gradient(135deg, #10b981, #059669)',
+                                borderRadius: '12px',
+                                padding: '12px',
                                 display: 'flex',
                                 alignItems: 'center',
-                                justifyContent: 'center',
-                                marginRight: '15px'
+                                justifyContent: 'center'
                             }}>
-                                <span style={{ color: 'white', fontSize: '24px' }}>💰</span>
+                                <DollarSign size={24} style={{ color: 'white' }} />
                             </div>
-                            <h3 style={{
-                                margin: '0',
-                                fontSize: '1.4rem',
-                                color: '#333'
-                            }}>Premium Breakdown</h3>
+                            <h2 style={{ margin: 0, color: '#1f2937', fontSize: '1.4rem', fontWeight: '600' }}>
+                                Financial Details
+                            </h2>
                         </div>
 
-                        <div style={{ marginBottom: '20px' }}>
-                            <div style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                marginBottom: '15px',
-                                padding: '15px',
-                                background: 'linear-gradient(135deg, #f8f9fa, #e9ecef)',
-                                borderRadius: '10px'
-                            }}>
-                                <span style={{ fontWeight: '600', color: '#333' }}>Base Premium</span>
-                                <span
-                                    className="number-animate"
-                                    style={{
-                                        fontSize: '1.5rem',
-                                        fontWeight: 'bold',
-                                        color: '#4ecdc4'
-                                    }}
-                                >
-                  ${insuranceData?.basePremium}
-                </span>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.9rem', color: '#6b7280', marginBottom: '5px', fontWeight: '500' }}>
+                                    Coverage Amount
+                                </label>
+                                <p style={{ margin: 0, fontSize: '1.4rem', color: '#059669', fontWeight: '700' }}>
+                                    {formatCurrency(policyData.covarageAmount)}
+                                </p>
                             </div>
 
-                            <div style={{
-                                display: 'flex',
-                                justifyContent: 'space-between',
-                                alignItems: 'center',
-                                marginBottom: '15px',
-                                padding: '15px',
-                                background: 'linear-gradient(135deg, #fff3cd, #ffeaa7)',
-                                borderRadius: '10px'
-                            }}>
-                                <span style={{ fontWeight: '600', color: '#333' }}>Risk Multiplier</span>
-                                <span
-                                    className="number-animate"
-                                    style={{
-                                        fontSize: '1.5rem',
-                                        fontWeight: 'bold',
-                                        color: '#fdcb6e'
-                                    }}
-                                >
-                  ×{insuranceData?.riskMultiplier}
-                </span>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.9rem', color: '#6b7280', marginBottom: '5px', fontWeight: '500' }}>
+                                    Base Premium
+                                </label>
+                                <p style={{ margin: 0, fontSize: '1.1rem', color: '#1f2937', fontWeight: '600' }}>
+                                    {formatCurrency(policyData.basePremium)}
+                                </p>
                             </div>
-                        </div>
 
-                        <div style={{
-                            background: 'linear-gradient(135deg, #667eea, #764ba2)',
-                            borderRadius: '15px',
-                            padding: '20px',
-                            textAlign: 'center',
-                            animation: selectedCard === 'premium' ? 'pulse 1s infinite' : 'none'
-                        }}>
-                            <div style={{ color: 'white', marginBottom: '10px' }}>
-                                <span style={{ fontSize: '1rem', opacity: '0.9' }}>Final Premium</span>
-                            </div>
-                            <div
-                                className="number-animate"
-                                style={{
-                                    fontSize: '3rem',
-                                    fontWeight: 'bold',
-                                    color: 'white',
-                                    textShadow: '2px 2px 4px rgba(0,0,0,0.3)'
-                                }}
-                            >
-                                ${insuranceData?.finalPremium}
-                            </div>
-                            <div style={{
-                                fontSize: '0.9rem',
-                                color: 'rgba(255,255,255,0.8)',
-                                marginTop: '5px'
-                            }}>
-                                per month
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.9rem', color: '#6b7280', marginBottom: '5px', fontWeight: '500' }}>
+                                    Final Premium
+                                </label>
+                                <p style={{ margin: 0, fontSize: '1.2rem', color: '#dc2626', fontWeight: '700' }}>
+                                    {formatCurrency(policyData.finalPremium)}
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                {/* Interactive Summary */}
-                <div
-                    className="card"
-                    style={{
-                        background: 'rgba(255,255,255,0.95)',
+                {/* Bottom Row */}
+                <div style={{
+                    display: 'grid',
+                    gridTemplateColumns: 'repeat(auto-fit, minmax(350px, 1fr))',
+                    gap: '25px'
+                }}>
+                    {/* Policy Dates Card */}
+                    <div style={{
+                        background: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(20px)',
                         borderRadius: '20px',
                         padding: '30px',
-                        textAlign: 'center',
-                        boxShadow: '0 10px 30px rgba(0,0,0,0.2)',
-                        backdropFilter: 'blur(10px)'
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        transform: 'translateY(0)',
+                        transition: 'transform 0.3s ease, box-shadow 0.3s ease'
                     }}
-                >
-                    <h2 style={{
-                        color: '#333',
-                        marginBottom: '20px',
-                        fontSize: '2rem'
-                    }}>
-                        Policy Summary
-                    </h2>
+                         onMouseEnter={(e) => {
+                             e.currentTarget.style.transform = 'translateY(-5px)';
+                             e.currentTarget.style.boxShadow = '0 25px 50px rgba(0,0,0,0.15)';
+                         }}
+                         onMouseLeave={(e) => {
+                             e.currentTarget.style.transform = 'translateY(0)';
+                             e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.1)';
+                         }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px' }}>
+                            <div style={{
+                                background: 'linear-gradient(135deg, #8b5cf6, #7c3aed)',
+                                borderRadius: '12px',
+                                padding: '12px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
+                                <Calendar size={24} style={{ color: 'white' }} />
+                            </div>
+                            <h2 style={{ margin: 0, color: '#1f2937', fontSize: '1.4rem', fontWeight: '600' }}>
+                                Policy Period
+                            </h2>
+                        </div>
 
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '15px' }}>
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.9rem', color: '#6b7280', marginBottom: '5px', fontWeight: '500' }}>
+                                    Start Date
+                                </label>
+                                <p style={{ margin: 0, fontSize: '1.1rem', color: '#1f2937', fontWeight: '600' }}>
+                                    {formatDate(policyData.policyStartDate)}
+                                </p>
+                            </div>
+
+                            <div>
+                                <label style={{ display: 'block', fontSize: '0.9rem', color: '#6b7280', marginBottom: '5px', fontWeight: '500' }}>
+                                    End Date
+                                </label>
+                                <p style={{ margin: 0, fontSize: '1.1rem', color: '#1f2937', fontWeight: '600' }}>
+                                    {formatDate(policyData.policyEndDate)}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Risk Score Card */}
                     <div style={{
-                        display: 'grid',
-                        gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
-                        gap: '20px',
-                        marginTop: '20px'
-                    }}>
-                        <div style={{
-                            padding: '20px',
-                            background: 'linear-gradient(135deg, #a8edea, #fed6e3)',
-                            borderRadius: '15px',
-                            animation: 'slideInUp 0.6s ease-out 0.2s both'
-                        }}>
-                            <div style={{ fontSize: '2rem', marginBottom: '10px' }}>📋</div>
-                            <div style={{ fontWeight: 'bold', color: '#333' }}>Policy ID</div>
-                            <div style={{ fontSize: '1.2rem', color: '#666' }}>{insuranceData?.policyId}</div>
+                        background: 'rgba(255, 255, 255, 0.95)',
+                        backdropFilter: 'blur(20px)',
+                        borderRadius: '20px',
+                        padding: '30px',
+                        boxShadow: '0 20px 40px rgba(0,0,0,0.1)',
+                        border: '1px solid rgba(255,255,255,0.2)',
+                        transform: 'translateY(0)',
+                        transition: 'transform 0.3s ease, box-shadow 0.3s ease'
+                    }}
+                         onMouseEnter={(e) => {
+                             e.currentTarget.style.transform = 'translateY(-5px)';
+                             e.currentTarget.style.boxShadow = '0 25px 50px rgba(0,0,0,0.15)';
+                         }}
+                         onMouseLeave={(e) => {
+                             e.currentTarget.style.transform = 'translateY(0)';
+                             e.currentTarget.style.boxShadow = '0 20px 40px rgba(0,0,0,0.1)';
+                         }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '15px', marginBottom: '25px' }}>
+                            <div style={{
+                                background: policyData.driscScore >= 8 ? 'linear-gradient(135deg, #10b981, #059669)' :
+                                    policyData.driscScore >= 6 ? 'linear-gradient(135deg, #f59e0b, #d97706)' :
+                                        'linear-gradient(135deg, #ef4444, #dc2626)',
+                                borderRadius: '12px',
+                                padding: '12px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}>
+                                <TrendingUp size={24} style={{ color: 'white' }} />
+                            </div>
+                            <h2 style={{ margin: 0, color: '#1f2937', fontSize: '1.4rem', fontWeight: '600' }}>
+                                Risk Assessment
+                            </h2>
                         </div>
 
-                        <div style={{
-                            padding: '20px',
-                            background: 'linear-gradient(135deg, #ffecd2, #fcb69f)',
-                            borderRadius: '15px',
-                            animation: 'slideInUp 0.6s ease-out 0.4s both'
-                        }}>
-                            <div style={{ fontSize: '2rem', marginBottom: '10px' }}>🎯</div>
-                            <div style={{ fontWeight: 'bold', color: '#333' }}>Risk Level</div>
-                            <div style={{ fontSize: '1.2rem', color: '#666' }}>{insuranceData?.riskCategory}</div>
-                        </div>
+                        <div style={{ textAlign: 'center' }}>
+                            <div style={{
+                                width: '120px',
+                                height: '120px',
+                                borderRadius: '50%',
+                                background: `conic-gradient(${
+                                    policyData.driscScore >= 8 ? '#10b981' :
+                                        policyData.driscScore >= 6 ? '#f59e0b' :
+                                            '#ef4444'
+                                } ${policyData.driscScore * 36}deg, #e5e7eb 0deg)`,
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                margin: '0 auto 15px auto',
+                                position: 'relative'
+                            }}>
+                                <div style={{
+                                    width: '90px',
+                                    height: '90px',
+                                    borderRadius: '50%',
+                                    background: 'white',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    justifyContent: 'center',
+                                    flexDirection: 'column'
+                                }}>
+                  <span style={{ fontSize: '1.8rem', fontWeight: '700', color: '#1f2937' }}>
+                    {policyData.driscScore}
+                  </span>
+                                    <span style={{ fontSize: '0.8rem', color: '#6b7280' }}>/ 10</span>
+                                </div>
+                            </div>
 
-                        <div style={{
-                            padding: '20px',
-                            background: 'linear-gradient(135deg, #d299c2, #fef9d7)',
-                            borderRadius: '15px',
-                            animation: 'slideInUp 0.6s ease-out 0.6s both'
-                        }}>
-                            <div style={{ fontSize: '2rem', marginBottom: '10px' }}>💳</div>
-                            <div style={{ fontWeight: 'bold', color: '#333' }}>Monthly Payment</div>
-                            <div style={{ fontSize: '1.2rem', color: '#666' }}>${insuranceData?.finalPremium}</div>
+                            <label style={{ display: 'block', fontSize: '0.9rem', color: '#6b7280', marginBottom: '5px', fontWeight: '500' }}>
+                                DRISC Score
+                            </label>
+                            <p style={{
+                                margin: 0,
+                                fontSize: '1rem',
+                                color: policyData.driscScore >= 8 ? '#059669' :
+                                    policyData.driscScore >= 6 ? '#d97706' :
+                                        '#dc2626',
+                                fontWeight: '600'
+                            }}>
+                                {policyData.driscScore >= 8 ? 'Excellent' :
+                                    policyData.driscScore >= 6 ? 'Good' :
+                                        'Needs Attention'}
+                            </p>
                         </div>
                     </div>
                 </div>
             </div>
         </div>
     );
-}
+};
+
+export default InsurancePage;

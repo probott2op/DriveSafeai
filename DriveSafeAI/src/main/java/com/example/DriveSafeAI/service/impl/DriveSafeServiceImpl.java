@@ -247,30 +247,9 @@ public class DriveSafeServiceImpl implements DriveSafeService {
         DriscScore latest = driscScoreRepository.findTopByUseridOrderByCalculatedAtDesc(user)
                 .orElseThrow(() -> new RuntimeException("No DriscScore found"));
 
-        RiskCategory category = riskCategoryRepo.findByMinScoreLessThanEqualAndMaxScoreGreaterThanEqual(
-                latest.getScore(), latest.getScore()).orElseThrow();
-
-        BigDecimal calculated = policy.getBasePremium()
-                .multiply(BigDecimal.valueOf(category.getPremiumMultiplier()));
-
-        PremiumCalculation pc = new PremiumCalculation();
-        pc.setPolicy(policy);
-        pc.setDriscScore(latest);
-        pc.setRiskCategory(category);
-        pc.setBasePremium(policy.getBasePremium());
-        pc.setRiskMultiplier(category.getPremiumMultiplier());
-        pc.setCalculatedPremium(calculated);
-        pc.setPeriodStart(LocalDate.now());
-        pc.setPeriodEnd(LocalDate.now().plusMonths(12));
-        pc.setIsActive(true);
-        premiumRepo.save(pc);
-
-        policy.setCurrentPremium(calculated);
-        policy.setStatus(PolicyStatus.ACTIVE);
-        policyRepo.save(policy);
-
-        return new PremiumCalculationDTO(policy.getId(), latest.getScore(), category.getCategoryName(),
-                policy.getBasePremium(), category.getPremiumMultiplier(), calculated);
+        float finalPremium = 4000 + ((100 - latest.getScore())/100)*4000;
+        return new PremiumCalculationDTO(policy.getId(), policy.getBasePremium().longValue(), policy.getCoverageAmount().longValue(),
+                policy.getCoverageType(), policy.getPolicyEndDate(), policy.getPolicyStartDate(), policy.getPolicyNumber(), latest.getScore(),finalPremium );
     }
 
     // 7️⃣ File Insurance Claim

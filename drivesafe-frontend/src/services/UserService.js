@@ -67,11 +67,11 @@ class UserService {
         return axios.post(`${API_URL}/notifications/${notificationId}/mark-read`, {}, this.getAuthHeader());
     }
 
-    async getDriscScore(userId) {
+    async getDriscScore(userId, N) {
         return (
             await axios.get(`${API_URL}/drisc-score/${userId}`, {
                 ...this.getAuthHeader(),
-                params: { N: 2 }
+                params: { N: N}
             })
         ).data;
     }

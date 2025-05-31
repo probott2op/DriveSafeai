@@ -37,7 +37,7 @@ public class SecurityConfig {
                 }
         );
         // Remove this line - it's causing the popup
-        // http.httpBasic(Customizer.withDefaults());
+//         http.httpBasic(Customizer.withDefaults());
         http.sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         http.addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
