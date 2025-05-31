@@ -92,6 +92,9 @@ class UserService {
         return (await axios.get(`${API_URL}/insurance/claim/${policyId}`, this.getAuthHeader())).data;
     }
 
+    async getRewardPoints(userId) {
+        return (await axios.get(`${API_URL}/rewards/${userId}`, this.getAuthHeader())).data;
+    }
     // Helper method for auth headers
     getAuthHeader() {
         const token = localStorage.getItem('token');
