@@ -249,42 +249,43 @@ const Header = () => {
                       )}
                     </NavDropdown>
 
-                    {/* Reward Points Section */}
-                    <div
-                        className="me-3 d-flex align-items-center"
-                        style={{
-                          background: 'linear-gradient(135deg, #ffd700 0%, #ffb347 100%)',
-                          color: '#1a1a2e',
-                          padding: '8px 16px',
-                          borderRadius: '25px',
-                          fontWeight: 'bold',
-                          fontSize: '0.95rem',
-                          boxShadow: '0 4px 15px rgba(255, 215, 0, 0.3)',
-                          border: '2px solid rgba(255, 215, 0, 0.5)',
-                          transition: 'all 0.3s ease',
-                          cursor: 'pointer'
-                        }}
-                        onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'scale(1.05)';
-                          e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 215, 0, 0.4)';
-                        }}
-                        onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'scale(1)';
-                          e.currentTarget.style.boxShadow = '0 4px 15px rgba(255, 215, 0, 0.3)';
-                        }}
-                        title="Your Reward Points"
-                    >
-                      <span
+                      {/* Reward Points Section */}
+                      <div
+                          className="me-3 d-flex align-items-center"
                           style={{
-                            fontSize: '1.2rem',
-                            marginRight: '6px',
-                            animation: 'spin 3s linear infinite'
+                              background: 'linear-gradient(135deg, #ffd700 0%, #ffb347 100%)',
+                              color: '#1a1a2e',
+                              padding: '8px 16px',
+                              borderRadius: '25px',
+                              fontWeight: 'bold',
+                              fontSize: '0.95rem',
+                              boxShadow: '0 4px 15px rgba(255, 215, 0, 0.3)',
+                              border: '2px solid rgba(255, 215, 0, 0.5)',
+                              transition: 'all 0.3s ease',
+                              cursor: 'pointer'
                           }}
+                          onMouseEnter={(e) => {
+                              e.currentTarget.style.transform = 'scale(1.05)';
+                              e.currentTarget.style.boxShadow = '0 6px 20px rgba(255, 215, 0, 0.4)';
+                          }}
+                          onMouseLeave={(e) => {
+                              e.currentTarget.style.transform = 'scale(1)';
+                              e.currentTarget.style.boxShadow = '0 4px 15px rgba(255, 215, 0, 0.3)';
+                          }}
+                          onClick={() => window.location.href = '/rewards-page'}
+                          title="Your Reward Points - Click to view rewards"
                       >
-                        🪙
-                      </span>
-                      {rewardPoints.toLocaleString()}
-                    </div>
+                          <span
+                              style={{
+                                  fontSize: '1.2rem',
+                                  marginRight: '6px',
+                                  animation: 'spin 3s linear infinite'
+                              }}
+                          >
+                            🪙
+                          </span>
+                          {rewardPoints.toLocaleString()}
+                      </div>
 
                     <Navbar.Text
                         className="me-3"

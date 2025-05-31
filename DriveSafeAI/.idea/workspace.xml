@@ -5,12 +5,15 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="14986295-19a6-4f7b-b96a-a9e94411574d" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../drivesafe-frontend/src/components/dashboard/Insurance.jsx" afterDir="false" />
+      <change afterPath="$PROJECT_DIR$/../drivesafe-frontend/src/components/dashboard/RewardPointRedemption.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/DriveSafeAI/controller/DriveSafeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/DriveSafeAI/controller/DriveSafeController.java" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/example/DriveSafeAI/controller/DriveSafeController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/DriveSafeAI/controller/DriveSafeController.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/example/DriveSafeAI/service/DriveSafeService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/DriveSafeAI/service/DriveSafeService.class" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/target/classes/com/example/DriveSafeAI/service/impl/DriveSafeServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/DriveSafeAI/service/impl/DriveSafeServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../drivesafe-frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../drivesafe-frontend/src/App.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../drivesafe-frontend/src/components/auth/Login.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../drivesafe-frontend/src/components/auth/Login.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../drivesafe-frontend/src/components/common/Footer.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../drivesafe-frontend/src/components/common/Footer.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../drivesafe-frontend/src/components/common/Header.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../drivesafe-frontend/src/components/common/Header.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../drivesafe-frontend/src/components/dashboard/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../drivesafe-frontend/src/components/dashboard/Dashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../drivesafe-frontend/src/pages/Home.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../drivesafe-frontend/src/pages/Home.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../drivesafe-frontend/src/services/UserService.js" beforeDir="false" afterPath="$PROJECT_DIR$/../drivesafe-frontend/src/services/UserService.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -87,7 +90,7 @@
       <workItem from="1748424757103" duration="4766000" />
       <workItem from="1748434570390" duration="352000" />
       <workItem from="1748683562371" duration="835000" />
-      <workItem from="1748684451294" duration="15870000" />
+      <workItem from="1748684451294" duration="17923000" />
     </task>
     <servers />
   </component>

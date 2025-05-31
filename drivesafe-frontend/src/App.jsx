@@ -17,6 +17,9 @@ import Register from './components/auth/Register';
 import Dashboard from './components/dashboard/Dashboard';
 import OBDDashboard from "./pages/OBDSimulator.jsx";
 import TripDashboard from "./components/dashboard/TripDashboard.jsx";
+import RewardsPage from "./components/dashboard/RewardPointRedemption.jsx";
+import Home from "./pages/Home.jsx";
+import Insurance from "./components/dashboard/Insurance.jsx";
 
 
 // Error Pages
@@ -64,7 +67,7 @@ const App = () => {
                     <div className="flex-grow-1">
                         <Routes>
                             {/* Public Routes */}
-                            <Route path="/" element={<HomePage />} />
+                            <Route path="/" element={<Home />} />
                             <Route path="/login" element={<Login />} />
                             <Route path="/register" element={<Register />} />
 
@@ -74,6 +77,8 @@ const App = () => {
                                 <Route path="/notifications" element={<Notifications />} />
                                 <Route path="/trip-monitor" element={<OBDDashboard />} />
                                 <Route path="/trip-history" element={<TripDashboard />} />
+                                <Route path="/rewards-page" element={<RewardsPage />} />
+                                <Route path="/insurance" element={<Insurance />} />
                             </Route>
 
 

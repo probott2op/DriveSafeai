@@ -1,18 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import {
-  Container,
-  Row,
-  Col,
-  Card,
-  Navbar,
-  Badge,
-  ProgressBar,
-  Alert,
-  Button
-} from 'react-bootstrap';
-import 'bootstrap/dist/css/bootstrap.min.css';
 import UserService from '../../services/UserService';
+import {useNavigate} from "react-router-dom";
 
 const Dashboard = () => {
   const [userData, setUserData] = useState(null);
@@ -44,29 +32,45 @@ const Dashboard = () => {
   }, []);
 
   const getRiskLevel = (score) => {
-    if (score >= 80) return { level: 'Low', variant: 'success', symbol: '✓' };
-    if (score >= 60) return { level: 'Medium', variant: 'warning', symbol: '⚠' };
-    return { level: 'High', variant: 'danger', symbol: '⚠' };
+    if (score >= 80) return { level: 'Low', color: '#10b981', symbol: '✓' };
+    if (score >= 60) return { level: 'Medium', color: '#f59e0b', symbol: '⚠' };
+    return { level: 'High', color: '#ef4444', symbol: '⚠' };
   };
 
-  const getScoreVariant = (score) => {
-    if (score >= 80) return 'success';
-    if (score >= 60) return 'warning';
-    return 'danger';
+  const getScoreColor = (score) => {
+    if (score >= 80) return '#10b981';
+    if (score >= 60) return '#f59e0b';
+    return '#ef4444';
   };
 
   const handleStartTrip = () => {
-    navigate('/trip-monitor');
+      navigate("/trip-monitor");
   };
 
   if (loading) {
     return (
-        <div className="d-flex justify-content-center align-items-center min-vh-100 bg-light">
-          <div className="text-center">
-            <div className="spinner-border text-primary mb-3" role="status">
-              <span className="visually-hidden">Loading...</span>
-            </div>
-            <p className="text-muted">Loading dashboard...</p>
+        <div style={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
+          minHeight: '100vh',
+          background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+          fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+        }}>
+          <div style={{ textAlign: 'center' }}>
+            <div style={{
+              width: '50px',
+              height: '50px',
+              border: '4px solid rgba(255,255,255,0.3)',
+              borderTop: '4px solid white',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite',
+              margin: '0 auto 20px'
+            }}></div>
+            <p style={{ color: 'white', fontSize: '16px', margin: 0 }}>Loading dashboard...</p>
+            <style>
+              {`@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`}
+            </style>
           </div>
         </div>
     );
@@ -75,340 +79,468 @@ const Dashboard = () => {
   const riskData = driscScore ? getRiskLevel(driscScore.score) : null;
   const tripsCount = driscScore?.tripsConsidered || driscScore?.trips_considered || 0;
 
+  const cardStyle = {
+    background: 'white',
+    borderRadius: '16px',
+    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.08)',
+    padding: '24px',
+    transition: 'all 0.3s ease',
+    border: '1px solid rgba(0, 0, 0, 0.05)',
+    cursor: 'default'
+  };
+
+  const statCardStyle = {
+    ...cardStyle,
+    display: 'flex',
+    flexDirection: 'column',
+    justifyContent: 'space-between',
+    minHeight: '140px',
+    position: 'relative',
+    overflow: 'hidden'
+  };
+
+  const buttonStyle = {
+    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+    color: 'white',
+    border: 'none',
+    borderRadius: '12px',
+    padding: '12px 24px',
+    fontSize: '14px',
+    fontWeight: '600',
+    cursor: 'pointer',
+    transition: 'all 0.3s ease',
+    display: 'flex',
+    alignItems: 'center',
+    gap: '8px'
+  };
+
+  const badgeStyle = (color) => ({
+    background: color,
+    color: 'white',
+    padding: '4px 12px',
+    borderRadius: '20px',
+    fontSize: '12px',
+    fontWeight: '600',
+    border: 'none'
+  });
+
+  const progressBarStyle = {
+    width: '100%',
+    height: '8px',
+    backgroundColor: '#f3f4f6',
+    borderRadius: '4px',
+    overflow: 'hidden',
+    marginBottom: '12px'
+  };
+
+  const progressFillStyle = (score, color) => ({
+    height: '100%',
+    backgroundColor: color,
+    width: `${score}%`,
+    borderRadius: '4px',
+    transition: 'width 1s ease-in-out'
+  });
+
   return (
-      <div className="min-vh-100 bg-light">
+      <div style={{
+        minHeight: '100vh',
+        background: 'linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)',
+        fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif'
+      }}>
         {/* Header */}
-        <Navbar bg="white" className="shadow-sm border-bottom">
-          <Container fluid>
-            <div className="d-flex justify-content-between align-items-center w-100 py-3">
-              <div>
-                <h1 className="h3 fw-bold text-dark mb-1">Risk Scoring Dashboard</h1>
-                <p className="text-muted mb-0">Monitor and analyze driving risk metrics</p>
+        <header style={{
+          background: 'rgba(255, 255, 255, 0.95)',
+          backdropFilter: 'blur(10px)',
+          borderBottom: '1px solid rgba(0, 0, 0, 0.08)',
+          padding: '20px 0',
+          position: 'sticky',
+          top: 0,
+          zIndex: 100
+        }}>
+          <div style={{
+            maxWidth: '1200px',
+            margin: '0 auto',
+            padding: '0 20px',
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center'
+          }}>
+            <div>
+              <h1 style={{ margin: '0 0 8px 0', fontSize: '28px', fontWeight: '700', color: '#1f2937' }}>
+                Risk Scoring Dashboard
+              </h1>
+              <p style={{ margin: 0, color: '#6b7280', fontSize: '16px' }}>
+                Monitor and analyze driving risk metrics
+              </p>
+            </div>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '16px' }}>
+              <button
+                  style={buttonStyle}
+                  onClick={handleStartTrip}
+                  onMouseEnter={(e) => e.target.style.transform = 'translateY(-2px)'}
+                  onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+              >
+                <span>🚗</span>
+                Show Live Trip
+              </button>
+              <div style={{
+                display: 'flex',
+                alignItems: 'center',
+                background: 'rgba(0, 0, 0, 0.05)',
+                borderRadius: '12px',
+                padding: '12px 16px',
+                gap: '8px'
+              }}>
+                <span>👤</span>
+                <span style={{ fontWeight: '600', color: '#1f2937' }}>
+                {userData?.fullName || 'Loading...'}
+              </span>
               </div>
-              <div className="d-flex align-items-center gap-3">
-                <Button
-                    variant="primary"
-                    size="sm"
-                    onClick={handleStartTrip}
-                    className="d-flex align-items-center gap-2"
-                >
-                  <span>🚗</span>
-                  Show Live Trip
-                </Button>
-                <div className="d-flex align-items-center bg-light rounded px-3 py-2">
-                  <span className="me-2">👤</span>
-                  <span className="fw-medium text-dark">
-                  {userData?.fullName || 'Loading...'}
+            </div>
+          </div>
+        </header>
+
+        <main style={{ maxWidth: '1200px', margin: '0 auto', padding: '32px 20px' }}>
+          {/* Stats Grid */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
+            gap: '24px',
+            marginBottom: '32px'
+          }}>
+            {/* Risk Score Card */}
+            <div
+                style={statCardStyle}
+                onMouseEnter={(e) => e.target.style.transform = 'translateY(-4px)'}
+                onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <p style={{ margin: '0 0 8px 0', color: '#6b7280', fontSize: '14px', fontWeight: '600' }}>
+                    DRISC SCORE
+                  </p>
+                  <h3 style={{
+                    margin: 0,
+                    fontSize: '36px',
+                    fontWeight: '700',
+                    color: getScoreColor(driscScore?.score || 0)
+                  }}>
+                    {driscScore?.score?.toFixed(1) || '0.0'}
+                  </h3>
+                </div>
+                <div style={{
+                  width: '60px',
+                  height: '60px',
+                  borderRadius: '50%',
+                  background: `${riskData?.color || '#9ca3af'}20`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '24px'
+                }}>
+                  📊
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '16px' }}>
+                <span>📈</span>
+                <small style={{ color: '#6b7280' }}>Risk assessment</small>
+              </div>
+            </div>
+
+            {/* Risk Level Card */}
+            <div
+                style={statCardStyle}
+                onMouseEnter={(e) => e.target.style.transform = 'translateY(-4px)'}
+                onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <p style={{ margin: '0 0 8px 0', color: '#6b7280', fontSize: '14px', fontWeight: '600' }}>
+                    RISK LEVEL
+                  </p>
+                  <h3 style={{
+                    margin: 0,
+                    fontSize: '24px',
+                    fontWeight: '700',
+                    color: riskData?.color || '#9ca3af'
+                  }}>
+                    {riskData?.level || 'N/A'}
+                  </h3>
+                </div>
+                <div style={{
+                  width: '60px',
+                  height: '60px',
+                  borderRadius: '50%',
+                  background: `${riskData?.color || '#9ca3af'}20`,
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '24px'
+                }}>
+                  {riskData?.symbol || '🛡'}
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '16px' }}>
+                <span>🛡</span>
+                <small style={{ color: '#6b7280' }}>Current status</small>
+              </div>
+            </div>
+
+            {/* Trips Analyzed Card */}
+            <div
+                style={statCardStyle}
+                onMouseEnter={(e) => e.target.style.transform = 'translateY(-4px)'}
+                onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <p style={{ margin: '0 0 8px 0', color: '#6b7280', fontSize: '14px', fontWeight: '600' }}>
+                    TRIPS ANALYZED
+                  </p>
+                  <h3 style={{ margin: 0, fontSize: '36px', fontWeight: '700', color: '#3b82f6' }}>
+                    {tripsCount}
+                  </h3>
+                </div>
+                <div style={{
+                  width: '60px',
+                  height: '60px',
+                  borderRadius: '50%',
+                  background: '#3b82f620',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '24px'
+                }}>
+                  🚗
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '16px' }}>
+                <span>🕒</span>
+                <small style={{ color: '#6b7280' }}>
+                  {tripsCount > 0 ? 'Data points collected' : 'No trips recorded'}
+                </small>
+              </div>
+            </div>
+
+            {/* Premium Impact Card */}
+            <div
+                style={statCardStyle}
+                onMouseEnter={(e) => e.target.style.transform = 'translateY(-4px)'}
+                onMouseLeave={(e) => e.target.style.transform = 'translateY(0)'}
+            >
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <div>
+                  <p style={{ margin: '0 0 8px 0', color: '#6b7280', fontSize: '14px', fontWeight: '600' }}>
+                    PREMIUM IMPACT
+                  </p>
+                  <h3 style={{ margin: 0, fontSize: '24px', fontWeight: '700', color: '#10b981' }}>
+                    {driscScore?.score >= 80 ? '↓ 15%' : driscScore?.score >= 60 ? '→ 0%' : '↑ 25%'}
+                  </h3>
+                </div>
+                <div style={{
+                  width: '60px',
+                  height: '60px',
+                  borderRadius: '50%',
+                  background: '#10b98120',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  fontSize: '24px'
+                }}>
+                  💰
+                </div>
+              </div>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginTop: '16px' }}>
+                <span>📉</span>
+                <small style={{ color: '#6b7280' }}>Estimated savings</small>
+              </div>
+            </div>
+          </div>
+
+          {/* Main Content Grid */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'minmax(300px, 1fr) minmax(500px, 2fr)',
+            gap: '32px',
+            marginBottom: '32px'
+          }}>
+            {/* User Profile Card */}
+            <div style={cardStyle}>
+              <div style={{ display: 'flex', alignItems: 'center', marginBottom: '24px' }}>
+                <div style={{
+                  width: '64px',
+                  height: '64px',
+                  borderRadius: '50%',
+                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  marginRight: '16px',
+                  fontSize: '24px'
+                }}>
+                  👤
+                </div>
+                <div>
+                  <h5 style={{ margin: '0 0 4px 0', fontSize: '18px', fontWeight: '600', color: '#1f2937' }}>
+                    {userData?.fullName || 'Loading...'}
+                  </h5>
+                  <p style={{ margin: 0, color: '#6b7280', fontSize: '14px' }}>
+                    {userData?.email || 'Loading...'}
+                  </p>
+                </div>
+              </div>
+
+              <div style={{ borderTop: '1px solid #e5e7eb', paddingTop: '20px' }}>
+                {[
+                  { icon: '🚗', label: 'Vehicle', value: userData?.vehicleNo || 'Loading...' },
+                  { icon: '📍', label: 'User ID', value: `#${userData?.userId || 'Loading...'}` },
+                  { icon: '🛣️', label: 'Total Trips', value: `${tripsCount} trips` }
+                ].map((item, index) => (
+                    <div key={index} style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      alignItems: 'center',
+                      padding: '12px 0',
+                      borderTop: index > 0 ? '1px solid #f3f4f6' : 'none'
+                    }}>
+                      <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                        <span>{item.icon}</span>
+                        <span style={{ fontWeight: '500', color: '#374151' }}>{item.label}</span>
+                      </div>
+                      <span style={{ color: '#1f2937', fontWeight: '600' }}>{item.value}</span>
+                    </div>
+                ))}
+              </div>
+            </div>
+
+            {/* Risk Analysis Card */}
+            <div style={cardStyle}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+                <h5 style={{ margin: 0, fontSize: '20px', fontWeight: '600', color: '#1f2937' }}>
+                  Risk Analysis
+                </h5>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  {[
+                    { label: 'Safe', color: '#10b981' },
+                    { label: 'Moderate', color: '#f59e0b' },
+                    { label: 'High Risk', color: '#ef4444' }
+                  ].map((badge, index) => (
+                      <span key={index} style={badgeStyle(badge.color)}>
+                    {badge.label}
+                  </span>
+                  ))}
+                </div>
+              </div>
+
+              {/* Score Visualization */}
+              <div style={{ marginBottom: '32px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
+                  <span style={{ fontWeight: '500', color: '#374151' }}>Overall Risk Score</span>
+                  <span style={{
+                    fontWeight: '700',
+                    color: getScoreColor(driscScore?.score || 0),
+                    fontSize: '16px'
+                  }}>
+                  {driscScore?.score?.toFixed(1) || '0.0'}/100
                 </span>
+                </div>
+                <div style={progressBarStyle}>
+                  <div style={progressFillStyle(driscScore?.score || 0, getScoreColor(driscScore?.score || 0))}></div>
+                </div>
+                <div style={{ display: 'flex', justifyContent: 'space-between', fontSize: '12px', color: '#6b7280' }}>
+                  <span>Based on {tripsCount} trip{tripsCount !== 1 ? 's' : ''}</span>
+                  <span>{tripsCount < 5 ? 'More trips needed for accuracy' : 'Sufficient data'}</span>
+                </div>
+              </div>
+
+              {/* Risk Factors */}
+              <div>
+                <h6 style={{ margin: '0 0 16px 0', fontSize: '16px', fontWeight: '600', color: '#1f2937' }}>
+                  Risk Factors
+                </h6>
+                <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: '12px' }}>
+                  {[
+                    { icon: '🏎', label: 'Speeding Events', level: 'Low', color: '#10b981' },
+                    { icon: '🛑', label: 'Hard Braking', level: 'Moderate', color: '#f59e0b' },
+                    { icon: '🔄', label: 'Sharp Turns', level: 'Low', color: '#10b981' },
+                    { icon: '🌙', label: 'Night Driving', level: 'Normal', color: '#3b82f6' }
+                  ].map((factor, index) => (
+                      <div key={index} style={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'center',
+                        padding: '16px',
+                        background: '#f8fafc',
+                        borderRadius: '12px',
+                        transition: 'all 0.3s ease'
+                      }}>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                          <span>{factor.icon}</span>
+                          <span style={{ color: '#374151', fontWeight: '500' }}>{factor.label}</span>
+                        </div>
+                        <span style={badgeStyle(factor.color)}>{factor.level}</span>
+                      </div>
+                  ))}
                 </div>
               </div>
             </div>
-          </Container>
-        </Navbar>
-
-        <Container fluid className="py-4">
-          {/* Main Stats Grid */}
-          <Row className="g-4 mb-4">
-            {/* Risk Score Card */}
-            <Col xs={12} md={6} lg={3}>
-              <Card className="h-100 shadow-sm border-0">
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <p className="text-muted small fw-medium mb-1">DRISC Score</p>
-                      <h3 className={`fw-bold text-${getScoreVariant(driscScore?.score || 0)} mb-0`}>
-                        {driscScore?.score?.toFixed(1) || '0.0'}
-                      </h3>
-                    </div>
-                    <div className={`p-3 rounded-circle bg-${riskData?.variant || 'secondary'} bg-opacity-10`}>
-                      <span className={`text-${riskData?.variant || 'secondary'} fs-3`}>📊</span>
-                    </div>
-                  </div>
-                  <div className="d-flex align-items-center mt-3">
-                    <span className="text-success me-2">📈</span>
-                    <small className="text-muted">Risk assessment</small>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-
-            {/* Risk Level Card */}
-            <Col xs={12} md={6} lg={3}>
-              <Card className="h-100 shadow-sm border-0">
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <p className="text-muted small fw-medium mb-1">Risk Level</p>
-                      <h4 className={`fw-bold text-${riskData?.variant || 'secondary'} mb-0`}>
-                        {riskData?.level || 'N/A'}
-                      </h4>
-                    </div>
-                    <div className={`p-3 rounded-circle bg-${riskData?.variant || 'secondary'} bg-opacity-10`}>
-                    <span className={`text-${riskData?.variant || 'secondary'} fs-3`}>
-                      {riskData?.symbol || '🛡'}
-                    </span>
-                    </div>
-                  </div>
-                  <div className="d-flex align-items-center mt-3">
-                    <span className="text-primary me-2">🛡</span>
-                    <small className="text-muted">Current status</small>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-
-            {/* Trips Analyzed Card */}
-            <Col xs={12} md={6} lg={3}>
-              <Card className="h-100 shadow-sm border-0">
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <p className="text-muted small fw-medium mb-1">Trips Analyzed</p>
-                      <h3 className="fw-bold text-primary mb-0">
-                        {tripsCount}
-                      </h3>
-                    </div>
-                    <div className="p-3 rounded-circle bg-primary bg-opacity-10">
-                      <span className="text-primary fs-3">🚗</span>
-                    </div>
-                  </div>
-                  <div className="d-flex align-items-center mt-3">
-                    <span className="text-muted me-2">🕒</span>
-                    <small className="text-muted">
-                      {tripsCount > 0 ? 'Data points collected' : 'No trips recorded'}
-                    </small>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-
-            {/* Premium Impact Card */}
-            <Col xs={12} md={6} lg={3}>
-              <Card className="h-100 shadow-sm border-0">
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-start">
-                    <div>
-                      <p className="text-muted small fw-medium mb-1">Premium Impact</p>
-                      <h4 className="fw-bold text-success mb-0">
-                        {driscScore?.score >= 80 ? '↓ 15%' : driscScore?.score >= 60 ? '→ 0%' : '↑ 25%'}
-                      </h4>
-                    </div>
-                    <div className="p-3 rounded-circle bg-success bg-opacity-10">
-                      <span className="text-success fs-3">💰</span>
-                    </div>
-                  </div>
-                  <div className="d-flex align-items-center mt-3">
-                    <span className="text-success me-2">📉</span>
-                    <small className="text-muted">Estimated savings</small>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-
-          <Row className="g-4">
-            {/* User Profile Card */}
-            <Col lg={4}>
-              <Card className="shadow-sm border-0">
-                <Card.Body>
-                  <div className="d-flex align-items-center mb-4">
-                    <div className="rounded-circle bg-gradient d-flex align-items-center justify-content-center me-3"
-                         style={{width: '64px', height: '64px', background: 'linear-gradient(135deg, #007bff, #6f42c1)'}}>
-                      <span className="text-white fs-1">👤</span>
-                    </div>
-                    <div>
-                      <h5 className="fw-semibold mb-1">
-                        {userData?.fullName || 'Loading...'}
-                      </h5>
-                      <p className="text-muted mb-0">{userData?.email || 'Loading...'}</p>
-                    </div>
-                  </div>
-
-                  <div className="border-top pt-3">
-                    <Row className="align-items-center py-2">
-                      <Col xs={6}>
-                        <div className="d-flex align-items-center">
-                          <span className="text-muted me-2">🚗</span>
-                          <span className="fw-medium text-dark">Vehicle</span>
-                        </div>
-                      </Col>
-                      <Col xs={6} className="text-end">
-                        <code className="text-dark">
-                          {userData?.vehicleNo || 'Loading...'}
-                        </code>
-                      </Col>
-                    </Row>
-                    <Row className="align-items-center py-2 border-top">
-                      <Col xs={6}>
-                        <div className="d-flex align-items-center">
-                          <span className="text-muted me-2">📍</span>
-                          <span className="fw-medium text-dark">User ID</span>
-                        </div>
-                      </Col>
-                      <Col xs={6} className="text-end">
-                      <span className="text-dark">
-                        #{userData?.userId || 'Loading...'}
-                      </span>
-                      </Col>
-                    </Row>
-                    <Row className="align-items-center py-2 border-top">
-                      <Col xs={6}>
-                        <div className="d-flex align-items-center">
-                          <span className="text-muted me-2">🛣️</span>
-                          <span className="fw-medium text-dark">Total Trips</span>
-                        </div>
-                      </Col>
-                      <Col xs={6} className="text-end">
-                      <span className="text-dark">
-                        {tripsCount} trips
-                      </span>
-                      </Col>
-                    </Row>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-
-            {/* Risk Analysis Chart */}
-            <Col lg={8}>
-              <Card className="shadow-sm border-0">
-                <Card.Body>
-                  <div className="d-flex justify-content-between align-items-center mb-4">
-                    <h5 className="fw-semibold mb-0">Risk Analysis</h5>
-                    <div className="d-flex align-items-center">
-                      <Badge bg="success" className="me-2">Safe</Badge>
-                      <Badge bg="warning" className="me-2">Moderate</Badge>
-                      <Badge bg="danger">High Risk</Badge>
-                    </div>
-                  </div>
-
-                  {/* Score Visualization */}
-                  <div className="mb-4">
-                    <div className="d-flex justify-content-between align-items-center mb-2">
-                      <span className="fw-medium">Overall Risk Score</span>
-                      <span className={`fw-bold text-${getScoreVariant(driscScore?.score || 0)}`}>
-                      {driscScore?.score?.toFixed(1) || '0.0'}/100
-                    </span>
-                    </div>
-                    <ProgressBar
-                        variant={getScoreVariant(driscScore?.score || 0)}
-                        now={driscScore?.score || 0}
-                        style={{height: '12px'}}
-                    />
-                    <div className="d-flex justify-content-between align-items-center mt-2">
-                      <small className="text-muted">
-                        Based on {tripsCount} trip{tripsCount !== 1 ? 's' : ''}
-                      </small>
-                      <small className="text-muted">
-                        {tripsCount < 5 ? 'More trips needed for accuracy' : 'Sufficient data'}
-                      </small>
-                    </div>
-                  </div>
-
-                  {/* Risk Factors */}
-                  <div>
-                    <h6 className="fw-semibold mb-3">Risk Factors</h6>
-                    <Row className="g-3">
-                      <Col md={6}>
-                        <div className="p-3 bg-light rounded d-flex justify-content-between align-items-center">
-                          <div className="d-flex align-items-center">
-                            <span className="me-2">🏎</span>
-                            <span className="text-dark">Speeding Events</span>
-                          </div>
-                          <Badge bg="success">Low</Badge>
-                        </div>
-                      </Col>
-                      <Col md={6}>
-                        <div className="p-3 bg-light rounded d-flex justify-content-between align-items-center">
-                          <div className="d-flex align-items-center">
-                            <span className="me-2">🛑</span>
-                            <span className="text-dark">Hard Braking</span>
-                          </div>
-                          <Badge bg="warning">Moderate</Badge>
-                        </div>
-                      </Col>
-                      <Col md={6}>
-                        <div className="p-3 bg-light rounded d-flex justify-content-between align-items-center">
-                          <div className="d-flex align-items-center">
-                            <span className="me-2">🔄</span>
-                            <span className="text-dark">Sharp Turns</span>
-                          </div>
-                          <Badge bg="success">Low</Badge>
-                        </div>
-                      </Col>
-                      <Col md={6}>
-                        <div className="p-3 bg-light rounded d-flex justify-content-between align-items-center">
-                          <div className="d-flex align-items-center">
-                            <span className="me-2">🌙</span>
-                            <span className="text-dark">Night Driving</span>
-                          </div>
-                          <Badge bg="primary">Normal</Badge>
-                        </div>
-                      </Col>
-                    </Row>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
+          </div>
 
           {/* Recommendations */}
-          <Row className="mt-4">
-            <Col>
-              <Card className="shadow-sm border-0">
-                <Card.Body>
-                  <h5 className="fw-semibold mb-4">Recommendations</h5>
-                  <Row className="g-3">
-                    <Col md={4}>
-                      <Alert variant={tripsCount >= 5 ? "primary" : "info"} className="d-flex align-items-start">
-                        <span className="me-3 mt-1 fs-5">{tripsCount >= 5 ? "✅" : "ℹ️"}</span>
-                        <div>
-                          <h6 className="alert-heading">
-                            {tripsCount >= 5 ? "Good Score!" : "Getting Started"}
-                          </h6>
-                          <p className="mb-0 small">
-                            {tripsCount >= 5
-                                ? "Your driving behavior shows low risk patterns."
-                                : `Complete ${5 - tripsCount} more trips for accurate scoring.`
-                            }
-                          </p>
-                        </div>
-                      </Alert>
-                    </Col>
-                    <Col md={4}>
-                      <Alert variant="warning" className="d-flex align-items-start">
-                        <span className="me-3 mt-1 fs-5">⚠️</span>
-                        <div>
-                          <h6 className="alert-heading">More Data Needed</h6>
-                          <p className="mb-0 small">
-                            {tripsCount < 10
-                                ? "Complete more trips for better accuracy."
-                                : "Your data is comprehensive for analysis."
-                            }
-                          </p>
-                        </div>
-                      </Alert>
-                    </Col>
-                    <Col md={4}>
-                      <Alert variant="success" className="d-flex align-items-start">
-                        <span className="me-3 mt-1 fs-5">💰</span>
-                        <div>
-                          <h6 className="alert-heading">Premium Benefits</h6>
-                          <p className="mb-0 small">
-                            {tripsCount >= 5
-                                ? "Eligible for reduced insurance premiums."
-                                : "Complete more trips to unlock premium benefits."
-                            }
-                          </p>
-                        </div>
-                      </Alert>
-                    </Col>
-                  </Row>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-        </Container>
+          <div style={cardStyle}>
+            <h5 style={{ margin: '0 0 24px 0', fontSize: '20px', fontWeight: '600', color: '#1f2937' }}>
+              Recommendations
+            </h5>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '20px' }}>
+              {[
+                {
+                  icon: tripsCount >= 5 ? "✅" : "ℹ️",
+                  title: tripsCount >= 5 ? "Good Score!" : "Getting Started",
+                  message: tripsCount >= 5
+                      ? "Your driving behavior shows low risk patterns."
+                      : `Complete ${5 - tripsCount} more trips for accurate scoring.`,
+                  color: tripsCount >= 5 ? '#3b82f6' : '#06b6d4'
+                },
+                {
+                  icon: "⚠️",
+                  title: "More Data Needed",
+                  message: tripsCount < 10
+                      ? "Complete more trips for better accuracy."
+                      : "Your data is comprehensive for analysis.",
+                  color: '#f59e0b'
+                },
+                {
+                  icon: "💰",
+                  title: "Premium Benefits",
+                  message: tripsCount >= 5
+                      ? "Eligible for reduced insurance premiums."
+                      : "Complete more trips to unlock premium benefits.",
+                  color: '#10b981'
+                }
+              ].map((rec, index) => (
+                  <div key={index} style={{
+                    display: 'flex',
+                    alignItems: 'flex-start',
+                    gap: '16px',
+                    padding: '20px',
+                    background: `${rec.color}10`,
+                    borderRadius: '12px',
+                    border: `1px solid ${rec.color}20`
+                  }}>
+                    <span style={{ fontSize: '24px' }}>{rec.icon}</span>
+                    <div>
+                      <h6 style={{ margin: '0 0 8px 0', fontSize: '16px', fontWeight: '600', color: rec.color }}>
+                        {rec.title}
+                      </h6>
+                      <p style={{ margin: 0, fontSize: '14px', color: '#374151', lineHeight: '1.5' }}>
+                        {rec.message}
+                      </p>
+                    </div>
+                  </div>
+              ))}
+            </div>
+          </div>
+        </main>
       </div>
   );
 };
