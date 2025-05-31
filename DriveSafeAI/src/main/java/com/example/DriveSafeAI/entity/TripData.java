@@ -33,5 +33,9 @@ public class TripData {
     @ManyToOne
     @JoinColumn(name = "vehicle_id")
     private Vehicle vehicle;
+
+    @Column(name = "trip_no")
+    private Integer tripNo;
+
 }
 

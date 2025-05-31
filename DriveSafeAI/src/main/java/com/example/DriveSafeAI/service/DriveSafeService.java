@@ -25,15 +25,19 @@ public interface DriveSafeService {
 
     PremiumCalculationDTO calculatePremium(Long userId);
 
-    String fileClaim(InsuranceClaimDTO dto);
+  String fileClaim(InsuranceClaimDTO dto);
 
     List<InsuranceClaimDTO> getClaimsByPolicy(Long policyId);
 
 
-    //upload trip csv file
+//upload trip csv file
     String uploadTripCsv(MultipartFile file, Long vehicleId);
 
     //for continous live data from frontend
     TripResponseDTO processLiveTripSession(String sessionId);
+
+    //get total reward points for a user
+    public int getTotalRewardPoints(Long userId);
+
 
 }

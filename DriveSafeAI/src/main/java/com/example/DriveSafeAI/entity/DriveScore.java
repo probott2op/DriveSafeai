@@ -31,5 +31,9 @@ public class DriveScore {
     @OneToOne
     @JoinColumn(name = "tripdata_id", unique = true)
     private TripData tripData;
+
+    @Column(name = "reward_points")
+    private Integer rewardPoints;
+    private Float distanceTravelled;
 }
 

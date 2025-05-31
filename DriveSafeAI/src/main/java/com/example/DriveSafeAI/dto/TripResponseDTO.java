@@ -10,5 +10,6 @@ public class TripResponseDTO {
     public Long tripId;
     public Float driveScore;
     public String feedback;
+    private Integer rewardPoints;
 }
 

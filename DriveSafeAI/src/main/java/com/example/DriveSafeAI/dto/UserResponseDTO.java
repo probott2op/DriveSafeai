@@ -12,3 +12,4 @@ public class UserResponseDTO {
     public String vehicleNo;
     public String fullName;
 }
+

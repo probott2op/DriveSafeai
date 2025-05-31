@@ -1,5 +1,6 @@
 package com.example.DriveSafeAI.controller;
 
+import com.example.DriveSafeAI.dao.TripSummaryRepository;
 import com.example.DriveSafeAI.dto.*;
 import com.example.DriveSafeAI.service.DriveSafeService;
 import com.example.DriveSafeAI.util.TripSessionBuffer;
@@ -9,6 +10,8 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
+import java.util.stream.Collectors;
+
 
 @RestController
 @RequestMapping("/api")
@@ -16,6 +19,9 @@ public class DriveSafeController {
 
     @Autowired
     private DriveSafeService driveSafeService;
+
+    @Autowired
+    private TripSummaryRepository TripSummaryRepository;
 
     // 1️⃣ Register new user + vehicle
     @PostMapping("/register")
@@ -63,22 +69,22 @@ public class DriveSafeController {
     }
 
     // 7️⃣ File an insurance claim
-    @PostMapping("/insurance/claim")
+   @PostMapping("/insurance/claim")
     public ResponseEntity<String> fileClaim(@RequestBody InsuranceClaimDTO dto) {
         return ResponseEntity.ok(driveSafeService.fileClaim(dto));
     }
 
     // 8️⃣ Get all claims for a policy
-    @GetMapping("/insurance/claim/{policyId}")
+   @GetMapping("/insurance/claim/{policyId}")
     public ResponseEntity<List<InsuranceClaimDTO>> getClaimsByPolicy(@PathVariable Long policyId) {
         return ResponseEntity.ok(driveSafeService.getClaimsByPolicy(policyId));
     }
-    //Adding CSV Upload Endpoint
-    @PostMapping("/upload-trips/{vehicleId}")
-    public ResponseEntity<String> uploadTrips(@RequestParam("file") MultipartFile file,
-                                              @PathVariable Long vehicleId) {
-        return ResponseEntity.ok(driveSafeService.uploadTripCsv(file, vehicleId));
-    }
+//Adding CSV Upload Endpoint
+@PostMapping("/upload-trips/{vehicleId}")
+public ResponseEntity<String> uploadTrips(@RequestParam("file") MultipartFile file,
+                                          @PathVariable Long vehicleId) {
+    return ResponseEntity.ok(driveSafeService.uploadTripCsv(file, vehicleId));
+}
 
     @PostMapping("/live")
     public ResponseEntity<String> receiveLiveTrip(@RequestBody LiveTripDTO dto) {
@@ -91,11 +97,28 @@ public class DriveSafeController {
         return ResponseEntity.ok(driveSafeService.processLiveTripSession(sessionId));
     }
 
-    //get user
-    @GetMapping("/user/{userId}")
-    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long userId) {
-        return ResponseEntity.ok(driveSafeService.getUserById(userId));
+//get user
+@GetMapping("/user/{userId}")
+public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long userId) {
+    return ResponseEntity.ok(driveSafeService.getUserById(userId));
+}
+
+    @GetMapping("/rewards/{userId}")
+    public ResponseEntity<Integer> getTotalRewards(@PathVariable Long userId) {
+        return ResponseEntity.ok(driveSafeService.getTotalRewardPoints(userId));
     }
+
+    //trip summary endpoint
+    @GetMapping("/trip-summary/{vehicleId}")
+    public List<TripSummaryDTO> getTripSummaries(@PathVariable Long vehicleId) {
+        return TripSummaryRepository.findByVehicleId(vehicleId).stream()
+                .map(s -> new TripSummaryDTO(
+                        s.getTripNo(), s.getDriveScore(), s.getMaxSpeed(), s.getAvgSpeed(),
+                        s.getMaxAcceleration(), s.getDistanceTravelled(), s.getIsRainy(), s.getIsDay()
+                ))
+                .collect(Collectors.toList());
+    }
+
 
 
 

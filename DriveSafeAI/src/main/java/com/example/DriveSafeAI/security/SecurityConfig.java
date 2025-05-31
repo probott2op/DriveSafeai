@@ -32,7 +32,7 @@ public class SecurityConfig {
         http.cors(Customizer.withDefaults());
         http.authorizeHttpRequests(customizer -> {
                     customizer.requestMatchers("/api/login", "/api/register", "/v1/admin/login", "/swagger-ui/**", "/v3/api-docs").permitAll();
-//                    customizer.requestMatchers("/v1/admin/**").hasRole("ADMIN");
+                    customizer.requestMatchers("/v1/admin/**").hasRole("ADMIN");
                     customizer.anyRequest().authenticated();
                 }
         );

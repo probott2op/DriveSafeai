@@ -15,6 +15,7 @@ import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
 import org.apache.commons.csv.CSVRecord;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -46,7 +47,9 @@ public class DriveSafeServiceImpl implements DriveSafeService {
     @Autowired private InsuranceClaimRepository claimRepo;
     @Autowired private AuthenticationManager authenticationManager;
     @Autowired private JWTService jwtService;
-    @Autowired private MLModelClient mlClient;
+   @Autowired private MLModelClient mlClient;
+    @Autowired
+    private TripSummaryRepository TripSummaryRepository;
 
     //User Registration
     @Override
@@ -71,9 +74,9 @@ public class DriveSafeServiceImpl implements DriveSafeService {
         return new UserResponseDTO(user.getId(), user.getEmail(), vehicle.getVehicleNo(), user.getFullName());
     }
 
-    //User Login
+  //User Login
     //@Override
-    //  public UserResponseDTO login(LoginRequestDTO dto) {
+  //  public UserResponseDTO login(LoginRequestDTO dto) {
 //        User user = userRepo.findByEmailAndPassword(dto.email, dto.password)
 //                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 //
@@ -131,19 +134,34 @@ public class DriveSafeServiceImpl implements DriveSafeService {
 
         Float driveScore = mlClient.getDriveScore(trip);
 
+
+
+        int rewardPoints = 0;
+        if (trip.getDistanceTravelled() >= 1.0) {
+            if (driveScore >= 90) rewardPoints = 50;
+            else if (driveScore >= 80) rewardPoints = 30;
+            else if (driveScore >= 70) rewardPoints = 20;
+            else if (driveScore >= 60) rewardPoints = 10;
+            else if (driveScore >= 50) rewardPoints = 5;
+            else rewardPoints = 0; // No reward for low scores
+        }
+
         DriveScore score = new DriveScore();
         score.setScore(driveScore);
         score.setTripData(trip);
         score.setVehicle(vehicle);
+        score.setRewardPoints(rewardPoints); // ✅ Set reward
         driveScoreRepo.save(score);
 
+// Notification
         Notification n = new Notification();
         n.setUser(vehicle.getUser());
+        n.setMessage("You earned " + rewardPoints + " reward points for this trip!");
         n.setMessage("Your Drive Score: " + driveScore);
         notificationRepo.save(n);
 
         return new TripResponseDTO(trip.getId(), driveScore,
-                driveScore > 80 ? "Excellent driving!" : "Improve your braking or acceleration.");
+                driveScore > 80 ? "Excellent driving!" : "Improve your braking or acceleration.",rewardPoints);
     }
 
     // DriscScore Calculation
@@ -155,28 +173,41 @@ public class DriveSafeServiceImpl implements DriveSafeService {
         Vehicle vehicle = vehicleRepo.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Vehicle not found for user"));
 
-        List<TripData> last10 = driveScoreRepo.findTop10ByVehicleIdOrderByCreatedAtDesc(vehicle.getId())
-                .stream()
-                .map(DriveScore::getTripData)
-                .collect(Collectors.toList());
-        if (last10.isEmpty()) {
-            throw new RuntimeException("Not enough trip data to calculate DRISC Score.");
+        int N = 10; // Variable: insurer defines recent trip count
+
+        // Fetch N latest trip summaries
+        List<TripSummary> recentTrips = TripSummaryRepository
+                .findTopNByVehicleIdOrderByIdDesc(vehicle.getId(), PageRequest.of(0, N));
+
+        if (recentTrips.isEmpty()) {
+            throw new RuntimeException("Not enough trip summaries to calculate DriscScore.");
         }
 
-        Float driscScore = mlClient.getDriscScore(last10);
+        double weightedSum = 0.0;
+        double totalDistance = 0.0;
 
-        DriscScore score = new DriscScore();
-        score.setScore(driscScore);
-        score.setUserid(user);
-        score.setTripsConsidered(last10.size());
-        driscScoreRepository.save(score);
+        for (TripSummary trip : recentTrips) {
+            if (trip.getDistanceTravelled() > 0) {
+                weightedSum += trip.getDriveScore() * trip.getDistanceTravelled();
+                totalDistance += trip.getDistanceTravelled();
+            }
+        }
+
+        float driscScore = (totalDistance == 0) ? 0f : (float) (weightedSum / totalDistance);
+
+        DriscScore drisc = new DriscScore();
+        drisc.setScore(driscScore);
+        drisc.setUserid(user);
+        drisc.setTripsConsidered(recentTrips.size());
+
+        driscScoreRepository.save(drisc);
 
         Notification n = new Notification();
         n.setUser(user);
-        n.setMessage("DRISC Score updated: " + driscScore);
+        n.setMessage("✅ DRISC Score updated: " + driscScore);
         notificationRepo.save(n);
 
-        return new DriscScoreDTO(driscScore, last10.size());
+        return new DriscScoreDTO(driscScore, recentTrips.size());
     }
 
     //Get Notifications
@@ -243,7 +274,7 @@ public class DriveSafeServiceImpl implements DriveSafeService {
     }
 
     // 7️⃣ File Insurance Claim
-    @Override
+   @Override
     public String fileClaim(InsuranceClaimDTO dto) {
         InsurancePolicy policy = policyRepo.findById(dto.policyId).orElseThrow();
 
@@ -254,19 +285,19 @@ public class DriveSafeServiceImpl implements DriveSafeService {
         claim.setIncidentDate(dto.incidentDate);
         claim.setClaimAmount(dto.claimAmount);
         claim.setDescription(dto.description);
-        claim.setClaimStatus(ClaimStatus.SUBMITTED);
+       claim.setClaimStatus(ClaimStatus.SUBMITTED);
         claim.setCreatedAt(LocalDateTime.now());
         claimRepo.save(claim);
-        return "Claim filed successfully with number: " + claim.getClaimNumber();
+       return "Claim filed successfully with number: " + claim.getClaimNumber();
     }
 
-    // 8️⃣ Get All Claims by Policy
+   // 8️⃣ Get All Claims by Policy
     @Override
     public List<InsuranceClaimDTO> getClaimsByPolicy(Long policyId) {
         return claimRepo.findByPolicyId(policyId).stream()
                 .map(claim -> new InsuranceClaimDTO(
                         claim.getPolicy().getId(),
-                        claim.getClaimNumber(),
+                       claim.getClaimNumber(),
                         claim.getClaimDate(),
                         claim.getIncidentDate(),
                         claim.getClaimAmount(),
@@ -278,8 +309,8 @@ public class DriveSafeServiceImpl implements DriveSafeService {
     // Upload Trip CSV File
 
 
-    @Override
-    public String uploadTripCsv(MultipartFile file, Long vehicleId) {
+  @Override
+   public String uploadTripCsv(MultipartFile file, Long vehicleId) {
         Vehicle vehicle = vehicleRepo.findById(vehicleId)
                 .orElseThrow(() -> new RuntimeException("Vehicle not found"));
 
@@ -306,12 +337,12 @@ public class DriveSafeServiceImpl implements DriveSafeService {
                 trips.add(trip);
             }
 
-            tripRepo.saveAll(trips); // ✅ Batch save
+           tripRepo.saveAll(trips); // ✅ Batch save
             return "Uploaded " + trips.size() + " trips successfully.";
 
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse CSV: " + e.getMessage());
-        }
+       }
 
     }
 
@@ -328,6 +359,10 @@ public class DriveSafeServiceImpl implements DriveSafeService {
         Vehicle vehicle = vehicleRepo.findById(vehicleId)
                 .orElseThrow(() -> new RuntimeException("Vehicle not found"));
 
+        Integer lastTripNo = tripRepo.findMaxTripNoByVehicleId(vehicleId);
+        int currentTripNo = (lastTripNo != null ? lastTripNo + 1 : 1);
+
+
         List<TripData> tripList = new ArrayList<>();
         for (LiveTripDTO dto : dataList) {
             TripData t = new TripData();
@@ -341,26 +376,66 @@ public class DriveSafeServiceImpl implements DriveSafeService {
             t.setEngineLoadValue(dto.getEngineLoadValue());
             t.setBrake(dto.getBrake());
             t.setVehicle(vehicle);
+            t.setTripNo(currentTripNo);  // 👈 NEW
             tripList.add(t);
         }
 
         tripRepo.saveAll(tripList);
 
         Float driveScore = mlClient.getDriveScoreFromList(tripList);
+        int rewardPoints = 0;
+         {
+            if (driveScore >= 90) rewardPoints = 50;
+            else if (driveScore >= 80) rewardPoints = 30;
+            else if (driveScore >= 70) rewardPoints = 20;
+            else if (driveScore >= 60) rewardPoints = 10;
+            else if (driveScore >= 50) rewardPoints = 5;
+            else rewardPoints = 0; // No reward for low scores
+        }
 
         DriveScore score = new DriveScore();
         score.setScore(driveScore);
         score.setVehicle(vehicle);
+        score.setRewardPoints(rewardPoints);
         score.setTripData(tripList.get(tripList.size() - 1)); // Use last row
         driveScoreRepo.save(score);
 
+        //create and save trip summary
+        TripSummary summary = TripSummary.builder()
+                .tripNo(currentTripNo)
+                .vehicle(vehicle)
+                .driveScore(driveScore)
+                .maxSpeed((float) tripList.stream().mapToDouble(TripData::getSpeed).max().orElse(0))
+                .avgSpeed((float) tripList.stream().mapToDouble(TripData::getSpeed).average().orElse(0))
+                .maxAcceleration((float) tripList.stream().mapToDouble(TripData::getAcceleration).max().orElse(0))
+                .distanceTravelled((float) tripList.stream().mapToDouble(TripData::getDistanceTravelled).sum())
+                .isRainy(false) // TODO: Detect from weather data
+                .isDay(true)    // TODO: Detect from timestamp
+                .build();
+
+        TripSummaryRepository.save(summary);
+
         Notification note = new Notification();
         note.setUser(vehicle.getUser());
+        note.setMessage("You earned " + rewardPoints + " reward points for this trip!");
         note.setMessage("Live trip session completed. Drive Score: " + driveScore);
         notificationRepo.save(note);
 
         return new TripResponseDTO(score.getTripData().getId(), driveScore,
-                driveScore > 80 ? "Excellent driving!" : "Needs improvement");
+                driveScore > 80 ? "Excellent driving!" : "Needs improvement",rewardPoints);
+
+
+    }
+
+    @Override
+    public int getTotalRewardPoints(Long userId) {
+        Vehicle vehicle = vehicleRepo.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
+
+        return driveScoreRepo.findTop10ByVehicleIdOrderByCreatedAtDesc(Long .valueOf(vehicle.getId()))
+                .stream()
+                .mapToInt(ds -> ds.getRewardPoints() == null ? 0 : ds.getRewardPoints())
+                .sum();
     }
 
 
