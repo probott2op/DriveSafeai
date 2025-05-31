@@ -62,20 +62,11 @@ const Header = () => {
                     <Nav.Link as={Link} to="/dashboard">
                       Dashboard
                     </Nav.Link>
-                    <Nav.Link as={Link} to="/trip">
-                      Submit Trip
-                    </Nav.Link>
                     <Nav.Link as={Link} to="/trip-history">
                       Trip History
                     </Nav.Link>
                     <Nav.Link as={Link} to="/insurance">
                       Insurance
-                    </Nav.Link>
-                    <Nav.Link as={Link} to="/claims">
-                      Claims
-                    </Nav.Link>
-                    <Nav.Link as={Link} to="/notifications">
-                      Notifications
                     </Nav.Link>
                   </>
               )}

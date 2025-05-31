@@ -30,6 +30,15 @@ const TripService = {
             throw new Error(error.response?.data?.message || 'Failed to end session');
         }
     },
+
+    tripHistory: async (userId) => {
+        try {
+            const response = await axios.get(`${API_URL}/trip-summary/${userId}`, getAuthHeader());
+            return response;
+        } catch (error) {
+            throw new Error(error.response?.data?.message || 'Failed to fetch Trip history');
+        }
+    },
 };
 
 export default TripService;

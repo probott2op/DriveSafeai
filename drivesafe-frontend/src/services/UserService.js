@@ -68,7 +68,12 @@ class UserService {
     }
 
     async getDriscScore(userId) {
-        return (await axios.get(`${API_URL}/drisc-score/${userId}`, this.getAuthHeader())).data;
+        return (
+            await axios.get(`${API_URL}/drisc-score/${userId}`, {
+                ...this.getAuthHeader(),
+                params: { N: 2 }
+            })
+        ).data;
     }
 
     async createPolicy(policyData) {

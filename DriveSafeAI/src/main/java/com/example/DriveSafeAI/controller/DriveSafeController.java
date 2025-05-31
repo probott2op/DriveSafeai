@@ -1,7 +1,9 @@
 package com.example.DriveSafeAI.controller;
 
 import com.example.DriveSafeAI.dao.TripSummaryRepository;
+import com.example.DriveSafeAI.dao.VehicleRepository;
 import com.example.DriveSafeAI.dto.*;
+import com.example.DriveSafeAI.entity.Vehicle;
 import com.example.DriveSafeAI.service.DriveSafeService;
 import com.example.DriveSafeAI.util.TripSessionBuffer;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +24,8 @@ public class DriveSafeController {
 
     @Autowired
     private TripSummaryRepository TripSummaryRepository;
+    @Autowired
+    private VehicleRepository vehicleRepository;
 
     // 1️⃣ Register new user + vehicle
     @PostMapping("/register")
@@ -46,8 +50,8 @@ public class DriveSafeController {
 
     // 3️⃣ Calculate DriscScore (risk score) for user
     @GetMapping("/drisc-score/{userId}")
-    public ResponseEntity<DriscScoreDTO> calculateDriscScore(@PathVariable Long userId) {
-        return ResponseEntity.ok(driveSafeService.calculateDriscScore(userId));
+    public ResponseEntity<DriscScoreDTO> calculateDriscScore(@PathVariable Long userId, @RequestParam Long N) {
+        return ResponseEntity.ok(driveSafeService.calculateDriscScore(userId, N));
     }
 
     // 4️⃣ Get all notifications for user
@@ -109,8 +113,11 @@ public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long userId) {
     }
 
     //trip summary endpoint
-    @GetMapping("/trip-summary/{vehicleId}")
-    public List<TripSummaryDTO> getTripSummaries(@PathVariable Long vehicleId) {
+    @GetMapping("/trip-summary/{userId}")
+    public List<TripSummaryDTO> getTripSummaries(@PathVariable Long userId) {
+        Long vehicleId = vehicleRepository.findById(userId)
+                .map(Vehicle::getId)
+                .orElseThrow(() -> new RuntimeException("Vehicle not found"));
         return TripSummaryRepository.findByVehicleId(vehicleId).stream()
                 .map(s -> new TripSummaryDTO(
                         s.getTripNo(), s.getDriveScore(), s.getMaxSpeed(), s.getAvgSpeed(),

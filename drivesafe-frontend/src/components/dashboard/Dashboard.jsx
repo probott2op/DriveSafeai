@@ -93,7 +93,7 @@ const Dashboard = () => {
                     className="d-flex align-items-center gap-2"
                 >
                   <span>🚗</span>
-                  Start Live Trip
+                  Show Live Trip
                 </Button>
                 <div className="d-flex align-items-center bg-light rounded px-3 py-2">
                   <span className="me-2">👤</span>

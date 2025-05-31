@@ -153,18 +153,40 @@ const OBDDashboard = () => {
 
       // Create trip data object matching your required format
       const tripData = {
-        vehicleId: data.vehicleId || 1,
         sessionId: currentSessionId,
-        speed: parseFloat(data.vehicle_speed || data.speed) || 0.0,
-        rpm: parseFloat(data.engine_rpm || data.rpm) || 0.0,
-        acceleration: parseFloat(data.acceleration) || 0.0,
-        throttlePosition: parseFloat(data.throttle_position || data.throttlePosition) || 0.0,
-        engineTemperature: parseFloat(data.coolant_temperature || data.engineTemperature) || 0.0,
-        systemVoltage: parseFloat(data.battery_voltage || data.systemVoltage) || 0.0,
-        distanceTravelled: parseFloat(data.distanceTravelled) || 0.0,
-        engineLoadValue: parseFloat(data.engine_load || data.engineLoadValue) || 0.0,
-        brake: parseFloat(data.brake) || 0.0
+        observationHour: parseFloat(data.observation_hour || 0),
+        speed: parseFloat(data.speed || 0),
+        rpm: parseFloat(data.rpm || 0),
+        acceleration: parseFloat(data.acceleration || 0),
+        throttlePosition: parseFloat(data.throttle_position || 0),
+        engineTemperature: parseFloat(data.engine_temperature || 0),
+        systemVoltage: parseFloat(data.system_voltage || 0),
+        distanceTravelled: parseFloat(data.distance_travelled || 0),
+        engineLoadValue: parseFloat(data.engine_load_value || 0),
+        latitude: parseFloat(data.latitude || 0),
+        longitude: parseFloat(data.longitude || 0),
+        altitude: parseFloat(data.altitude || 0),
+        idVehicle: parseInt(data.id_vehicle || 0),
+        bodyTemperature: parseFloat(data.body_temperature || 0),
+        idDriver: parseInt(data.id_driver || 0),
+        currentWeather: parseFloat(data.current_weather || 0),
+        hasPrecipitation: parseInt(data.has_precipitation || 0),
+        isDayTime: parseInt(data.is_day_time || 0),
+        temperature: parseFloat(data.temperature || 0),
+        windSpeed: parseFloat(data.wind_speed || 0),
+        windDirection: parseFloat(data.wind_direction || 0),
+        relativeHumidity: parseFloat(data.relative_humidity || 0),
+        visibility: parseFloat(data.visibility || 0),
+        uvIndex: parseFloat(data.uv_index || 0),
+        cloudCover: parseFloat(data.cloud_cover || 0),
+        ceiling: parseFloat(data.ceiling || 0),
+        pressure: parseFloat(data.pressure || 0),
+        precipitation: parseFloat(data.precipitation || 0),
+        accidentsOnsite: parseInt(data.accidents_onsite || 0),
+        designSpeed: parseFloat(data.design_speed || 0),
+        accidentsTime: parseInt(data.accidents_time || 0)
       };
+
 
       // Call TripService.live()
       const result = await TripService.live(tripData);
@@ -374,7 +396,7 @@ const OBDDashboard = () => {
           const newData = {
             rpm: [...prev.rpm.slice(-19), currentRpm],
             speed: [...prev.speed.slice(-19), currentSpeed],
-            throttle: [...prev.throttle.slice(-19), actualData.throttle_position || actualData.throttlePosition || 0],
+            throttle: [...prev.throttle.slice(-19), actualData.throttlePosition || actualData.throttlePosition || 0],
             temperature: [...prev.temperature.slice(-19), actualData.coolant_temperature || actualData.engineTemperature || 0],
             timestamps: [...prev.timestamps.slice(-19), now]
           };
@@ -658,7 +680,7 @@ const OBDDashboard = () => {
                     <div className="card-body text-center">
                       <i className="fas fa-tachometer-alt fa-2x mb-3 text-warning"></i>
                       <h5 className="card-title">Speed</h5>
-                      <h2 className="display-4 mb-0">{getData('vehicle_speed', 'speed')}</h2>
+                      <h2 className="display-4 mb-0">{getData('speed', 'vehicle_speed')}</h2>
                       <small>mph</small>
                     </div>
                   </div>
@@ -668,7 +690,7 @@ const OBDDashboard = () => {
                     <div className="card-body text-center">
                       <i className="fas fa-cog fa-2x mb-3 text-danger"></i>
                       <h5 className="card-title">Engine RPM</h5>
-                      <h2 className="display-4 mb-0">{getData('engine_rpm', 'rpm')}</h2>
+                      <h2 className="display-4 mb-0">{getData('rpm', 'engine_rpm')}</h2>
                       <small>rpm</small>
                     </div>
                   </div>
@@ -676,20 +698,20 @@ const OBDDashboard = () => {
                 <div className="col-md-3 mb-3">
                   <div className="card metric-card text-white h-100">
                     <div className="card-body text-center">
-                      <i className="fas fa-thermometer-half fa-2x mb-3 text-info"></i>
-                      <h5 className="card-title">Coolant Temp</h5>
-                      <h2 className="display-4 mb-0">{getData('coolant_temperature', 'engineTemperature')}</h2>
-                      <small>°C</small>
+                      <i className="fas fa-route fa-2x mb-3 text-info"></i>
+                      <h5 className="card-title">Distance</h5>
+                      <h2 className="display-4 mb-0">{getData('distanceTravelled', 'distance')}</h2>
+                      <small>km</small>
                     </div>
                   </div>
                 </div>
                 <div className="col-md-3 mb-3">
                   <div className="card metric-card text-white h-100">
                     <div className="card-body text-center">
-                      <i className="fas fa-gas-pump fa-2x mb-3 text-success"></i>
-                      <h5 className="card-title">Fuel Level</h5>
-                      <h2 className="display-4 mb-0">{getData('fuel_level', 'fuelLevel')}</h2>
-                      <small>%</small>
+                      <i className="fas fa-tachometer-alt fa-2x mb-3 text-success"></i>
+                      <h5 className="card-title">Acceleration</h5>
+                      <h2 className="display-4 mb-0">{getData('acceleration', 'fuelLevel')}</h2>
+                      <small>m/s²</small>
                     </div>
                   </div>
                 </div>
@@ -734,7 +756,7 @@ const OBDDashboard = () => {
                         </div>
                         <div className="col-8 text-end">
                           <h5 className="mb-0">Battery Voltage</h5>
-                          <h3>{getData('battery_voltage', 'systemVoltage')} V</h3>
+                          <h3>{getData('systemVoltage', 'systemVoltage')} V</h3>
                         </div>
                       </div>
                     </div>
@@ -749,7 +771,7 @@ const OBDDashboard = () => {
                         </div>
                         <div className="col-8 text-end">
                           <h5 className="mb-0">Engine Load</h5>
-                          <h3>{getData('engine_load', 'engineLoadValue')}%</h3>
+                          <h3>{getData('engine_load_value', 'engineLoadValue')}%</h3>
                         </div>
                       </div>
                     </div>
@@ -764,7 +786,7 @@ const OBDDashboard = () => {
                         </div>
                         <div className="col-8 text-end">
                           <h5 className="mb-0">Throttle Position</h5>
-                          <h3>{getData('throttle_position', 'throttlePosition')}%</h3>
+                          <h3>{getData('throttlePosition', 'throttlePosition')}%</h3>
                         </div>
                       </div>
                     </div>

@@ -15,7 +15,7 @@ const getAuthHeader = () => {
 const NotificationService = {
     getUserNotifications: async (userId) => {
         try {
-            const response = await axios.get(`${API_URL}/notifications//${userId}`, getAuthHeader());
+            const response = await axios.get(`${API_URL}/notifications/${userId}`, getAuthHeader());
             return response.data;
         } catch (error) {
             throw new Error(error.response?.data?.message || 'Failed to get notifications');

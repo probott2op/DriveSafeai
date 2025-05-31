@@ -20,10 +20,42 @@ public class TripData {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    // Vehicle telemetry data
     private Float speed, rpm, acceleration, throttlePosition, engineTemperature;
     private Float systemVoltage, engineLoadValue, distanceTravelled, brake;
 
-    // Risk Features
+    // Location data
+    private Double latitude, longitude;
+    private Long altitude;
+
+    // Driver and vehicle identifiers
+    private Long bodyTemperature;
+    private Long idDriver;
+
+    // Weather data
+    private Long currentWeather;
+    private Integer hasPrecipitation;
+    private Integer isDayTime;
+    private Double temperature;
+    private Double windSpeed;
+    private Long windDirection;
+    private Long relativeHumidity;
+    private Double visibility;
+    private Long uvIndex;
+    private Long cloudCover;
+    private Long ceiling;
+    private Long pressure;
+    private Double precipitation;
+
+    // Road and traffic data
+    private Long accidentsOnsite;
+    private Long designSpeed;
+    private Long accidentsTime;
+
+    // Observation metadata
+    private Integer observationHour;
+
+    // Risk Features (calculated)
     private Float speedRisk, harshAcceleration, rpmEfficiency, highRpmRisk, throttleAggression;
     private Float engineTempRisk, voltageRisk, engineLoadRisk, weatherRisk;
     private Float speedVariance, accelerationVariance, excessiveThrottleTime, engineStrain;
@@ -36,6 +68,4 @@ public class TripData {
 
     @Column(name = "trip_no")
     private Integer tripNo;
-
 }
-

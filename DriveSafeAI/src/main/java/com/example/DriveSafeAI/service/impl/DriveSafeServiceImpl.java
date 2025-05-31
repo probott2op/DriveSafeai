@@ -166,18 +166,18 @@ public class DriveSafeServiceImpl implements DriveSafeService {
 
     // DriscScore Calculation
     @Override
-    public DriscScoreDTO calculateDriscScore(Long userId) {
+    public DriscScoreDTO calculateDriscScore(Long userId, Long N) {
         User user = userRepo.findById(userId)
                 .orElseThrow(() -> new RuntimeException("User not found"));
 
         Vehicle vehicle = vehicleRepo.findByUserId(userId)
                 .orElseThrow(() -> new RuntimeException("Vehicle not found for user"));
 
-        int N = 10; // Variable: insurer defines recent trip count
+         // Variable: insurer defines recent trip count
 
         // Fetch N latest trip summaries
         List<TripSummary> recentTrips = TripSummaryRepository
-                .findTopNByVehicleIdOrderByIdDesc(vehicle.getId(), PageRequest.of(0, N));
+                .findTopNByVehicleIdOrderByIdDesc(vehicle.getId(), PageRequest.of(0, N.intValue()));
 
         if (recentTrips.isEmpty()) {
             throw new RuntimeException("Not enough trip summaries to calculate DriscScore.");
@@ -355,28 +355,62 @@ public class DriveSafeServiceImpl implements DriveSafeService {
             throw new RuntimeException("No trip data found for session: " + sessionId);
         }
 
-        Long vehicleId = dataList.get(0).getVehicleId();
+        Long vehicleId = dataList.get(0).getIdVehicle(); // Updated field name
         Vehicle vehicle = vehicleRepo.findById(vehicleId)
                 .orElseThrow(() -> new RuntimeException("Vehicle not found"));
 
         Integer lastTripNo = tripRepo.findMaxTripNoByVehicleId(vehicleId);
         int currentTripNo = (lastTripNo != null ? lastTripNo + 1 : 1);
 
-
         List<TripData> tripList = new ArrayList<>();
         for (LiveTripDTO dto : dataList) {
             TripData t = new TripData();
-            t.setSpeed(dto.getSpeed());
-            t.setRpm(dto.getRpm());
-            t.setAcceleration(dto.getAcceleration());
-            t.setThrottlePosition(dto.getThrottlePosition());
-            t.setEngineTemperature(dto.getEngineTemperature());
-            t.setSystemVoltage(dto.getSystemVoltage());
-            t.setDistanceTravelled(dto.getDistanceTravelled());
-            t.setEngineLoadValue(dto.getEngineLoadValue());
-            t.setBrake(dto.getBrake());
+
+            // Vehicle telemetry data
+            t.setSpeed(dto.getSpeed() != null ? dto.getSpeed().floatValue() : null);
+            t.setRpm(dto.getRpm() != null ? dto.getRpm().floatValue() : null);
+            t.setAcceleration(dto.getAcceleration() != null ? dto.getAcceleration().floatValue() : null);
+            t.setThrottlePosition(dto.getThrottlePosition() != null ? dto.getThrottlePosition().floatValue() : null);
+            t.setEngineTemperature(dto.getEngineTemperature() != null ? dto.getEngineTemperature().floatValue() : null);
+            t.setSystemVoltage(dto.getSystemVoltage() != null ? dto.getSystemVoltage().floatValue() : null);
+            t.setDistanceTravelled(dto.getDistanceTravelled() != null ? dto.getDistanceTravelled().floatValue() : null);
+            t.setEngineLoadValue(dto.getEngineLoadValue() != null ? dto.getEngineLoadValue().floatValue() : null);
+            // Note: brake field not present in LiveTripDTO, keeping as null
+
+            // Location data
+            t.setLatitude(dto.getLatitude());
+            t.setLongitude(dto.getLongitude());
+            t.setAltitude(dto.getAltitude());
+
+            // Driver and observation data
+            t.setBodyTemperature(dto.getBodyTemperature());
+            t.setIdDriver(dto.getIdDriver());
+            t.setObservationHour(dto.getObservationHour());
+
+            // Weather data
+            t.setCurrentWeather(dto.getCurrentWeather());
+            t.setHasPrecipitation(dto.getHasPrecipitation());
+            t.setIsDayTime(dto.getIsDayTime());
+            t.setTemperature(dto.getTemperature());
+            t.setWindSpeed(dto.getWindSpeed());
+            t.setWindDirection(dto.getWindDirection());
+            t.setRelativeHumidity(dto.getRelativeHumidity());
+            t.setVisibility(dto.getVisibility());
+            t.setUvIndex(dto.getUvIndex());
+            t.setCloudCover(dto.getCloudCover());
+            t.setCeiling(dto.getCeiling());
+            t.setPressure(dto.getPressure());
+            t.setPrecipitation(dto.getPrecipitation());
+
+            // Road and traffic data
+            t.setAccidentsOnsite(dto.getAccidentsOnsite());
+            t.setDesignSpeed(dto.getDesignSpeed());
+            t.setAccidentsTime(dto.getAccidentsTime());
+
+            // Entity relationships and metadata
             t.setVehicle(vehicle);
-            t.setTripNo(currentTripNo);  // 👈 NEW
+            t.setTripNo(currentTripNo);
+
             tripList.add(t);
         }
 
@@ -384,7 +418,7 @@ public class DriveSafeServiceImpl implements DriveSafeService {
 
         Float driveScore = mlClient.getDriveScoreFromList(tripList);
         int rewardPoints = 0;
-         {
+        {
             if (driveScore >= 90) rewardPoints = 50;
             else if (driveScore >= 80) rewardPoints = 30;
             else if (driveScore >= 70) rewardPoints = 20;
@@ -400,31 +434,48 @@ public class DriveSafeServiceImpl implements DriveSafeService {
         score.setTripData(tripList.get(tripList.size() - 1)); // Use last row
         driveScoreRepo.save(score);
 
-        //create and save trip summary
+        // Create and save trip summary with enhanced data
+        // Extract weather and time information from trip data
+        boolean isRainy = tripList.stream()
+                .anyMatch(t -> t.getHasPrecipitation() != null && t.getHasPrecipitation() == 1);
+        boolean isDay = tripList.stream()
+                .anyMatch(t -> t.getIsDayTime() != null && t.getIsDayTime() == 1);
+
         TripSummary summary = TripSummary.builder()
                 .tripNo(currentTripNo)
                 .vehicle(vehicle)
                 .driveScore(driveScore)
-                .maxSpeed((float) tripList.stream().mapToDouble(TripData::getSpeed).max().orElse(0))
-                .avgSpeed((float) tripList.stream().mapToDouble(TripData::getSpeed).average().orElse(0))
-                .maxAcceleration((float) tripList.stream().mapToDouble(TripData::getAcceleration).max().orElse(0))
-                .distanceTravelled((float) tripList.stream().mapToDouble(TripData::getDistanceTravelled).sum())
-                .isRainy(false) // TODO: Detect from weather data
-                .isDay(true)    // TODO: Detect from timestamp
+                .maxSpeed((float) tripList.stream()
+                        .filter(t -> t.getSpeed() != null)
+                        .mapToDouble(TripData::getSpeed)
+                        .max().orElse(0))
+                .avgSpeed((float) tripList.stream()
+                        .filter(t -> t.getSpeed() != null)
+                        .mapToDouble(TripData::getSpeed)
+                        .average().orElse(0))
+                .maxAcceleration((float) tripList.stream()
+                        .filter(t -> t.getAcceleration() != null)
+                        .mapToDouble(TripData::getAcceleration)
+                        .max().orElse(0))
+                .distanceTravelled((float) tripList.stream()
+                        .filter(t -> t.getDistanceTravelled() != null)
+                        .mapToDouble(TripData::getDistanceTravelled)
+                        .sum())
+                .isRainy(isRainy) // Now using actual weather data
+                .isDay(isDay)     // Now using actual daylight data
                 .build();
 
-        TripSummaryRepository.save(summary);
+        TripSummaryRepository.save(summary); // Fixed repository name
 
         Notification note = new Notification();
         note.setUser(vehicle.getUser());
-        note.setMessage("You earned " + rewardPoints + " reward points for this trip!");
-        note.setMessage("Live trip session completed. Drive Score: " + driveScore);
+        // Fixed: removed duplicate setMessage calls
+        note.setMessage("Live trip session completed. Drive Score: " + driveScore +
+                ". You earned " + rewardPoints + " reward points for this trip!");
         notificationRepo.save(note);
 
         return new TripResponseDTO(score.getTripData().getId(), driveScore,
-                driveScore > 80 ? "Excellent driving!" : "Needs improvement",rewardPoints);
-
-
+                driveScore > 80 ? "Excellent driving!" : "Needs improvement", rewardPoints);
     }
 
     @Override

@@ -5,12 +5,28 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="14986295-19a6-4f7b-b96a-a9e94411574d" name="Changes" comment="">
+      <change afterPath="$PROJECT_DIR$/../drivesafe-frontend/src/components/dashboard/TripDashboard.jsx" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/DriveSafeAI/controller/DriveSafeController.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/DriveSafeAI/controller/DriveSafeController.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/DriveSafeAI/dto/LiveTripDTO.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/DriveSafeAI/dto/LiveTripDTO.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/DriveSafeAI/entity/TripData.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/DriveSafeAI/entity/TripData.java" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/main/java/com/example/DriveSafeAI/security/SecurityConfig.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/DriveSafeAI/security/SecurityConfig.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/DriveSafeAI/service/DriveSafeService.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/DriveSafeAI/service/DriveSafeService.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/java/com/example/DriveSafeAI/service/impl/DriveSafeServiceImpl.java" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/java/com/example/DriveSafeAI/service/impl/DriveSafeServiceImpl.java" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main/resources/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/src/main/resources/application.properties" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../drivesafe-frontend/src/App.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../drivesafe-frontend/src/App.jsx" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../drivesafe-frontend/src/pages/Login.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../drivesafe-frontend/src/pages/Login.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/application.properties" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/application.properties" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/DriveSafeAI/controller/DriveSafeController.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/DriveSafeAI/controller/DriveSafeController.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/DriveSafeAI/dto/LiveTripDTO.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/DriveSafeAI/dto/LiveTripDTO.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/DriveSafeAI/entity/TripData.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/DriveSafeAI/entity/TripData.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/DriveSafeAI/security/SecurityConfig.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/DriveSafeAI/security/SecurityConfig.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/DriveSafeAI/service/DriveSafeService.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/DriveSafeAI/service/DriveSafeService.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/target/classes/com/example/DriveSafeAI/service/impl/DriveSafeServiceImpl.class" beforeDir="false" afterPath="$PROJECT_DIR$/target/classes/com/example/DriveSafeAI/service/impl/DriveSafeServiceImpl.class" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../drivesafe-frontend/src/components/common/Header.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../drivesafe-frontend/src/components/common/Header.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../drivesafe-frontend/src/components/dashboard/Dashboard.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../drivesafe-frontend/src/components/dashboard/Dashboard.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../drivesafe-frontend/src/pages/Notifications.jsx" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/../drivesafe-frontend/src/pages/OBDSimulator.jsx" beforeDir="false" afterPath="$PROJECT_DIR$/../drivesafe-frontend/src/pages/OBDSimulator.jsx" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../drivesafe-frontend/src/services/NotificationService.js" beforeDir="false" afterPath="$PROJECT_DIR$/../drivesafe-frontend/src/services/NotificationService.js" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../drivesafe-frontend/src/services/UserService.js" beforeDir="false" afterPath="$PROJECT_DIR$/../drivesafe-frontend/src/services/UserService.js" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -38,6 +54,10 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "RequestMappingsPanelOrder0": "0",
+    "RequestMappingsPanelOrder1": "1",
+    "RequestMappingsPanelWidth0": "75",
+    "RequestMappingsPanelWidth1": "75",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "RunOnceActivity.git.unshallow": "true",
     "Spring Boot.DriveSafeAiApplication.executor": "Run",
@@ -81,6 +101,8 @@
       <workItem from="1748413497309" duration="1092000" />
       <workItem from="1748424757103" duration="4766000" />
       <workItem from="1748434570390" duration="352000" />
+      <workItem from="1748683562371" duration="835000" />
+      <workItem from="1748684451294" duration="12276000" />
     </task>
     <servers />
   </component>

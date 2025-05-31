@@ -16,6 +16,7 @@ import Register from './components/auth/Register';
 // Dashboard Components
 import Dashboard from './components/dashboard/Dashboard';
 import OBDDashboard from "./pages/OBDSimulator.jsx";
+import TripDashboard from "./components/dashboard/TripDashboard.jsx";
 
 
 // Error Pages
@@ -72,6 +73,7 @@ const App = () => {
                                 <Route path="/dashboard" element={<Dashboard />} />
                                 <Route path="/notifications" element={<Notifications />} />
                                 <Route path="/trip-monitor" element={<OBDDashboard />} />
+                                <Route path="/trip-history" element={<TripDashboard />} />
                             </Route>
 
 
