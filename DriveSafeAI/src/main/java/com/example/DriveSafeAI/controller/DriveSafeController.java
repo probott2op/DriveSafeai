@@ -63,22 +63,22 @@ public class DriveSafeController {
     }
 
     // 7️⃣ File an insurance claim
-   @PostMapping("/insurance/claim")
+    @PostMapping("/insurance/claim")
     public ResponseEntity<String> fileClaim(@RequestBody InsuranceClaimDTO dto) {
         return ResponseEntity.ok(driveSafeService.fileClaim(dto));
     }
 
     // 8️⃣ Get all claims for a policy
-   @GetMapping("/insurance/claim/{policyId}")
+    @GetMapping("/insurance/claim/{policyId}")
     public ResponseEntity<List<InsuranceClaimDTO>> getClaimsByPolicy(@PathVariable Long policyId) {
         return ResponseEntity.ok(driveSafeService.getClaimsByPolicy(policyId));
     }
-//Adding CSV Upload Endpoint
-@PostMapping("/upload-trips/{vehicleId}")
-public ResponseEntity<String> uploadTrips(@RequestParam("file") MultipartFile file,
-                                          @PathVariable Long vehicleId) {
-    return ResponseEntity.ok(driveSafeService.uploadTripCsv(file, vehicleId));
-}
+    //Adding CSV Upload Endpoint
+    @PostMapping("/upload-trips/{vehicleId}")
+    public ResponseEntity<String> uploadTrips(@RequestParam("file") MultipartFile file,
+                                              @PathVariable Long vehicleId) {
+        return ResponseEntity.ok(driveSafeService.uploadTripCsv(file, vehicleId));
+    }
 
     @PostMapping("/live")
     public ResponseEntity<String> receiveLiveTrip(@RequestBody LiveTripDTO dto) {
@@ -89,6 +89,12 @@ public ResponseEntity<String> uploadTrips(@RequestParam("file") MultipartFile fi
     @PostMapping("/end-session/{sessionId}")
     public ResponseEntity<TripResponseDTO> endSession(@PathVariable String sessionId) {
         return ResponseEntity.ok(driveSafeService.processLiveTripSession(sessionId));
+    }
+
+    //get user
+    @GetMapping("/user/{userId}")
+    public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long userId) {
+        return ResponseEntity.ok(driveSafeService.getUserById(userId));
     }
 
 

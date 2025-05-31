@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Container, Row, Col, Card, Form, Button, Alert } from 'react-bootstrap';
-import { useAuth } from '../context/AuthContext';
+import { useAuth } from '../utils/AuthContext';
 import { tripAPI } from '../services/apiService';
 
 const TripSubmission = () => {

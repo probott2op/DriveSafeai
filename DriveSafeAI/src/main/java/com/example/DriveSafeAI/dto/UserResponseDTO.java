@@ -10,5 +10,5 @@ public class UserResponseDTO {
     public Long userId;
     public String email;
     public String vehicleNo;
+    public String fullName;
 }
-

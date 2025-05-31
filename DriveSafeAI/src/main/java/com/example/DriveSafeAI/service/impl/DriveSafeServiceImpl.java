@@ -46,7 +46,7 @@ public class DriveSafeServiceImpl implements DriveSafeService {
     @Autowired private InsuranceClaimRepository claimRepo;
     @Autowired private AuthenticationManager authenticationManager;
     @Autowired private JWTService jwtService;
-   @Autowired private MLModelClient mlClient;
+    @Autowired private MLModelClient mlClient;
 
     //User Registration
     @Override
@@ -68,12 +68,12 @@ public class DriveSafeServiceImpl implements DriveSafeService {
 
         vehicleRepo.save(vehicle);
 
-        return new UserResponseDTO(user.getId(), user.getEmail(), vehicle.getVehicleNo());
+        return new UserResponseDTO(user.getId(), user.getEmail(), vehicle.getVehicleNo(), user.getFullName());
     }
 
-  //User Login
+    //User Login
     //@Override
-  //  public UserResponseDTO login(LoginRequestDTO dto) {
+    //  public UserResponseDTO login(LoginRequestDTO dto) {
 //        User user = userRepo.findByEmailAndPassword(dto.email, dto.password)
 //                .orElseThrow(() -> new RuntimeException("Invalid credentials"));
 //
@@ -94,6 +94,19 @@ public class DriveSafeServiceImpl implements DriveSafeService {
         }
         throw new RuntimeException("Invalid credentials");
     }
+
+    //get user
+    @Override
+    public UserResponseDTO getUserById(Long userId) {
+        User user = userRepo.findById(userId)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Vehicle vehicle = vehicleRepo.findByUserId(userId)
+                .orElseThrow(() -> new RuntimeException("Vehicle not found for user"));
+
+        return new UserResponseDTO(user.getId(), user.getEmail(), vehicle.getVehicleNo(),user.getFullName());
+    }
+
 
 
     //Trip Submission and DriveScore Generation
@@ -230,7 +243,7 @@ public class DriveSafeServiceImpl implements DriveSafeService {
     }
 
     // 7️⃣ File Insurance Claim
-   @Override
+    @Override
     public String fileClaim(InsuranceClaimDTO dto) {
         InsurancePolicy policy = policyRepo.findById(dto.policyId).orElseThrow();
 
@@ -241,19 +254,19 @@ public class DriveSafeServiceImpl implements DriveSafeService {
         claim.setIncidentDate(dto.incidentDate);
         claim.setClaimAmount(dto.claimAmount);
         claim.setDescription(dto.description);
-       claim.setClaimStatus(ClaimStatus.SUBMITTED);
+        claim.setClaimStatus(ClaimStatus.SUBMITTED);
         claim.setCreatedAt(LocalDateTime.now());
         claimRepo.save(claim);
-       return "Claim filed successfully with number: " + claim.getClaimNumber();
+        return "Claim filed successfully with number: " + claim.getClaimNumber();
     }
 
-   // 8️⃣ Get All Claims by Policy
+    // 8️⃣ Get All Claims by Policy
     @Override
     public List<InsuranceClaimDTO> getClaimsByPolicy(Long policyId) {
         return claimRepo.findByPolicyId(policyId).stream()
                 .map(claim -> new InsuranceClaimDTO(
                         claim.getPolicy().getId(),
-                       claim.getClaimNumber(),
+                        claim.getClaimNumber(),
                         claim.getClaimDate(),
                         claim.getIncidentDate(),
                         claim.getClaimAmount(),
@@ -265,8 +278,8 @@ public class DriveSafeServiceImpl implements DriveSafeService {
     // Upload Trip CSV File
 
 
-  @Override
-   public String uploadTripCsv(MultipartFile file, Long vehicleId) {
+    @Override
+    public String uploadTripCsv(MultipartFile file, Long vehicleId) {
         Vehicle vehicle = vehicleRepo.findById(vehicleId)
                 .orElseThrow(() -> new RuntimeException("Vehicle not found"));
 
@@ -293,12 +306,12 @@ public class DriveSafeServiceImpl implements DriveSafeService {
                 trips.add(trip);
             }
 
-           tripRepo.saveAll(trips); // ✅ Batch save
+            tripRepo.saveAll(trips); // ✅ Batch save
             return "Uploaded " + trips.size() + " trips successfully.";
 
         } catch (Exception e) {
             throw new RuntimeException("Failed to parse CSV: " + e.getMessage());
-       }
+        }
 
     }
 
