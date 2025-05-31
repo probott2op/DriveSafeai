@@ -112,7 +112,7 @@ public class DriveSafeServiceImpl implements DriveSafeService {
 
 
 
-    //Trip Submission and DriveScore Generation
+  /*  //Trip Submission and DriveScore Generation
     @Override
     public TripResponseDTO submitTrip(TripRequestDTO dto) {
         TripData trip = new TripData();
@@ -162,7 +162,7 @@ public class DriveSafeServiceImpl implements DriveSafeService {
 
         return new TripResponseDTO(trip.getId(), driveScore,
                 driveScore > 80 ? "Excellent driving!" : "Improve your braking or acceleration.",rewardPoints);
-    }
+    }*/
 
     // DriscScore Calculation
     @Override

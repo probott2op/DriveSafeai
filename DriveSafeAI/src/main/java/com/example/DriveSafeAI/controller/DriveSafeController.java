@@ -2,14 +2,19 @@ package com.example.DriveSafeAI.controller;
 
 import com.example.DriveSafeAI.dao.TripSummaryRepository;
 import com.example.DriveSafeAI.dto.*;
+import com.example.DriveSafeAI.entity.TripData;
 import com.example.DriveSafeAI.service.DriveSafeService;
+import com.example.DriveSafeAI.service.impl.MLModelClient;
 import com.example.DriveSafeAI.util.TripSessionBuffer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -22,6 +27,9 @@ public class DriveSafeController {
 
     @Autowired
     private TripSummaryRepository TripSummaryRepository;
+
+    @Autowired
+    private MLModelClient mlClient;
 
     // 1️⃣ Register new user + vehicle
     @PostMapping("/register")
@@ -39,10 +47,10 @@ public class DriveSafeController {
 
 
     // 2️⃣ Submit trip data and get DriveScore
-    @PostMapping("/trip")
-    public ResponseEntity<TripResponseDTO> submitTrip(@RequestBody TripRequestDTO dto) {
-        return ResponseEntity.ok(driveSafeService.submitTrip(dto));
-    }
+   // @PostMapping("/trip")
+   // public ResponseEntity<TripResponseDTO> submitTrip(@RequestBody TripRequestDTO dto) {
+    //    return ResponseEntity.ok(driveSafeService.submitTrip(dto));
+  //  }
 
     // 3️⃣ Calculate DriscScore (risk score) for user
     @GetMapping("/drisc-score/{userId}")
@@ -118,7 +126,6 @@ public ResponseEntity<UserResponseDTO> getUserById(@PathVariable Long userId) {
                 ))
                 .collect(Collectors.toList());
     }
-
 
 
 
