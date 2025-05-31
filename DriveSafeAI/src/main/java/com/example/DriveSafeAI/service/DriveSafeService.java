@@ -15,7 +15,7 @@ public interface DriveSafeService {
 
 
 
-    TripResponseDTO submitTrip(TripRequestDTO dto);
+   // TripResponseDTO submitTrip(TripRequestDTO dto);
 
     DriscScoreDTO calculateDriscScore(Long userId, Long N);  //updated to use userid
 
